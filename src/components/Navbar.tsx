@@ -38,12 +38,12 @@ export default function Navbar() {
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
-            <div className="flex-shrink-0 flex items-center overflow-hidden h-16 md:h-20 w-40 md:w-56">
+            <div className="flex-shrink-0 flex items-center h-16 md:h-20 w-40 md:w-64">
               <Link href="/">
                 <img
                   src="/logo.jpg"
                   alt="Dhinakar Pharma"
-                  className="h-16 md:h-20 w-auto object-contain mix-blend-multiply contrast-[1.2] brightness-[1.1] scale-[1.4] origin-[10%_50%]"
+                  className="h-16 md:h-18 w-auto object-contain mix-blend-multiply contrast-[1.2] brightness-[1.1] scale-[1.15] origin-left"
                 />
               </Link>
             </div>

@@ -35,7 +35,7 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased bg-white text-gray-900 overflow-x-hidden min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow pt-16 md:pt-20">{children}</main>
+        <main className="flex-grow pt-20 md:pt-24">{children}</main>
         <Footer />
       </body>
     </html>

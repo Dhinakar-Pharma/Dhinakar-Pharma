@@ -22,10 +22,10 @@ export default function Values() {
   const [activeTab, setActiveTab] = useState(tabContent[0]);
 
   return (
-    <section id="values" className="min-h-screen bg-slate-50 flex flex-col">
+    <section id="values" className="min-h-screen bg-slate-50 flex flex-col scroll-mt-20 md:scroll-mt-24">
       
       {/* ── 1. TOP HEADER (BLUE PANEL) ── */}
-      <div className="w-full relative overflow-hidden py-16 sm:py-20 px-5 sm:px-10 lg:px-12" style={{ background: "linear-gradient(150deg, #0c2160 0%, #1B3F8B 50%, #2460aa 100%)" }}>
+      <div className="w-full relative overflow-hidden py-20 sm:py-24 px-5 sm:px-10 lg:px-12" style={{ background: "linear-gradient(150deg, #0c2160 0%, #1B3F8B 50%, #2460aa 100%)" }}>
         {/* Decorative elements */}
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
           style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "22px 22px" }} />
