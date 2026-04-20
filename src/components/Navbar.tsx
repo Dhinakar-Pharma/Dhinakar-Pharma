@@ -41,7 +41,7 @@ export default function Navbar() {
             <div className="flex-shrink-0 flex items-center h-16 md:h-20 w-40 md:w-64">
               <Link href="/">
                 <img
-                  src="/logo.jpg"
+                  src="/logo.png"
                   alt="Dhinakar Pharma"
                   className="h-16 md:h-18 w-auto object-contain mix-blend-multiply contrast-[1.2] brightness-[1.1] scale-[1.15] origin-left"
                 />
@@ -55,19 +55,17 @@ export default function Navbar() {
                   <Link
                     key={link.name}
                     href={link.href}
-                    className={`cursor-pointer group relative px-5 py-2 text-[13px] font-bold uppercase tracking-[0.15em] transition-all duration-300 ${
-                      isActive(link.href)
+                    className={`cursor-pointer group relative px-5 py-2 text-[13px] font-bold uppercase tracking-[0.15em] transition-all duration-300 ${isActive(link.href)
                         ? "text-brand-blue"
                         : "text-gray-500 hover:text-brand-blue"
-                    }`}
+                      }`}
                   >
                     {link.name}
                     <span
-                      className={`absolute -bottom-2 left-1/2 h-[2px] bg-gold-dark transform -translate-x-1/2 transition-all duration-500 ease-out rounded-full ${
-                        isActive(link.href)
+                      className={`absolute -bottom-2 left-1/2 h-[2px] bg-gold-dark transform -translate-x-1/2 transition-all duration-500 ease-out rounded-full ${isActive(link.href)
                           ? "w-1/2 opacity-100"
                           : "w-0 opacity-0 group-hover:w-1/2 group-hover:opacity-100"
-                      }`}
+                        }`}
                     />
                   </Link>
                 ))}
@@ -112,21 +110,18 @@ export default function Navbar() {
                 >
                   <Link
                     href={link.href}
-                    className={`cursor-pointer text-3xl font-serif transition-all duration-300 flex items-center group relative ${
-                      isActive(link.href) ? "text-brand-blue" : "text-gray-900 hover:text-brand-blue"
-                    }`}
+                    className={`cursor-pointer text-3xl font-serif transition-all duration-300 flex items-center group relative ${isActive(link.href) ? "text-brand-blue" : "text-gray-900 hover:text-brand-blue"
+                      }`}
                   >
                     <span
-                      className={`absolute left-0 h-[2px] top-1/2 -translate-y-1/2 bg-brand-blue transition-all duration-500 ease-out rounded-full ${
-                        isActive(link.href) ? "w-8" : "w-0 group-hover:w-8"
-                      }`}
+                      className={`absolute left-0 h-[2px] top-1/2 -translate-y-1/2 bg-brand-blue transition-all duration-500 ease-out rounded-full ${isActive(link.href) ? "w-8" : "w-0 group-hover:w-8"
+                        }`}
                     />
                     <span
-                      className={`transform transition-all duration-500 ease-out ${
-                        isActive(link.href)
+                      className={`transform transition-all duration-500 ease-out ${isActive(link.href)
                           ? "translate-x-12 opacity-100"
                           : "opacity-80 group-hover:opacity-100 group-hover:translate-x-12"
-                      }`}
+                        }`}
                     >
                       {link.name}
                     </span>
