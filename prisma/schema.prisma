@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  price       Float
+  category    String
+  focus       String
+  tagline     String
+  description String
+  image       String
+  benefits    Json
+  nutrition   Json
+  faq         Json
+  ingredients Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id                String   @id @default(cuid())
+  customerName      String
+  customerEmail     String
+  customerPhone     String
+  shippingAddress   String
+  totalAmount       Float
+  paymentStatus     PaymentStatus @default(PENDING)
+  fulfillmentStatus FulfillmentStatus @default(PROCESSING)
+  razorpayOrderId   String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  items             OrderItem[]
+  payments          Payment[]
+}
+
+model OrderItem {
+  id              String   @id @default(cuid())
+  orderId         String
+  productId       String
+  quantity        Int
+  priceAtPurchase Float
+
+  order           Order    @relation(fields: [orderId], references: [id])
+  product         Product  @relation(fields: [productId], references: [id])
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  orderId         String
+  amount          Float
+  currency        String   @default("INR")
+  status          PaymentStatus @default(PENDING)
+  gateway         String   // e.g., 'RAZORPAY'
+  transactionId   String?  // From the gateway
+  errorMessage    String?
+  
+  createdAt       DateTime @default(now())
+
+  order           Order    @relation(fields: [orderId], references: [id])
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum FulfillmentStatus {
+  PROCESSING
+  SHIPPED
+  DELIVERED
+}

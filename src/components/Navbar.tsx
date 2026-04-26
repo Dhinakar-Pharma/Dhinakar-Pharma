@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -13,10 +13,16 @@ const navLinks = [
   { name: "Why Us", href: "/why-us" },
 ];
 
+import { useCartStore } from "@/store/cartStore";
+import CartSidebar from "./CartSidebar";
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
+  
+  const { items, setIsOpen: setCartOpen } = useCartStore();
+  const cartItemCount = items.reduce((total, item) => total + item.quantity, 0);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -72,20 +78,36 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* Mobile menu button */}
-            <div className="md:hidden flex items-center">
-              <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-brand-blue focus:outline-none"
+            <div className="flex items-center gap-4">
+              {/* Cart Button */}
+              <button 
+                onClick={() => setCartOpen(true)}
+                className="relative p-2 text-slate-600 hover:text-brand-blue transition-colors focus:outline-none"
               >
-                <span className="sr-only">Open main menu</span>
-                {isOpen ? (
-                  <X className="block h-6 w-6" aria-hidden="true" />
-                ) : (
-                  <Menu className="block h-6 w-6" aria-hidden="true" />
+                <ShoppingBag className="w-6 h-6" />
+                {cartItemCount > 0 && (
+                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-brand-blue rounded-full shadow-sm">
+                    {cartItemCount}
+                  </span>
                 )}
               </button>
+
+              {/* Mobile menu button */}
+              <div className="md:hidden flex items-center">
+                <button
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-brand-blue focus:outline-none"
+                >
+                  <span className="sr-only">Open main menu</span>
+                  {isOpen ? (
+                    <X className="block h-6 w-6" aria-hidden="true" />
+                  ) : (
+                    <Menu className="block h-6 w-6" aria-hidden="true" />
+                  )}
+                </button>
+              </div>
             </div>
+
           </div>
         </div>
       </nav>
@@ -132,6 +154,8 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+      
+      <CartSidebar />
     </>
   );
 }
