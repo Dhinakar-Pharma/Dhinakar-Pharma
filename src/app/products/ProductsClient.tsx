@@ -5,9 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, SlidersHorizontal, ArrowRight, X, ShieldCheck, Dna } from "lucide-react";
 import Link from "next/link";
 
-const categories = ["All", "Metabolic Health", "Cellular Energy", "Antioxidant Support", "Reproductive Health"];
-
 export default function ProductsClient({ products }: { products: any[] }) {
+  const categories = ["All", ...Array.from(new Set(products.map(p => p.category)))];
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
@@ -23,7 +22,7 @@ export default function ProductsClient({ products }: { products: any[] }) {
     <div className="min-h-screen bg-white flex flex-col pt-0 font-sans scroll-mt-20 md:scroll-mt-24">
       
       {/* ── 1. HEADER (STREAMLINED NAV) ── */}
-      <div className="w-full relative overflow-hidden py-14 sm:py-20 px-6 lg:px-12 border-b border-brand-blue/10" style={{ background: "linear-gradient(150deg, #0c2160 0%, #1B3F8B 50%, #2460aa 100%)" }}>
+      <div className="w-full relative py-14 sm:py-20 px-6 lg:px-12 border-b border-brand-blue/10" style={{ background: "linear-gradient(150deg, #0c2160 0%, #1B3F8B 50%, #2460aa 100%)" }}>
         <div className="absolute inset-0 opacity-[0.05] pointer-events-none"
           style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
         
