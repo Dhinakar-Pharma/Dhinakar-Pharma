@@ -16,10 +16,13 @@ import { useCartStore } from "@/store/cartStore";
 
 export default function ProductDetailClient({ product }: { product: any }) {
   const [quantity, setQuantity] = useState(1);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { addItem, setIsOpen } = useCartStore();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
   }, [product?.id]);
 
   if (!product) {
@@ -40,7 +43,7 @@ export default function ProductDetailClient({ product }: { product: any }) {
       name: product.name,
       price: product.price,
       quantity,
-      image: product.image
+      image: product.images?.[0] || ""
     });
     setIsOpen(true); // Open the cart sidebar
   };
@@ -49,27 +52,81 @@ export default function ProductDetailClient({ product }: { product: any }) {
     <div className="min-h-screen bg-white font-sans text-gray-900 selection:bg-brand-blue/5">
       
       {/* ── 1. COMPACT SCIENTIFIC HEADER ── */}
-      <section className="relative pt-12 pb-12 sm:pt-16 sm:pb-20 bg-slate-50/50 border-b border-slate-100">
+      <section className="relative pt-24 pb-12 sm:pt-28 sm:pb-20 bg-slate-50/50 border-b border-slate-100">
         <div className="max-w-[1600px] mx-auto px-5 sm:px-10 lg:px-12">
           
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-20 items-center">
             
             {/* Image Stage */}
             <div className="lg:col-span-5 flex justify-center lg:justify-start">
-               <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="relative group w-full max-w-[420px]">
-                  <div className="aspect-[4/3] bg-white rounded-3xl border border-slate-100 shadow-sm flex items-center justify-center p-6 lg:p-10 relative overflow-hidden">
-                     <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 to-transparent" />
-                     <motion.img 
-                       src={product.image}
-                       alt={product.name}
-                       className="relative z-10 max-h-[280px] lg:max-h-[350px] w-auto drop-shadow-lg"
-                     />
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="w-full max-w-[480px] flex flex-row gap-4"
+              >
+                {/* Thumbnail Strip */}
+                {product.images?.length > 1 && (
+                  <div className="flex flex-col gap-3 pt-1">
+                    {product.images.map((img: string, idx: number) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentImageIndex(idx)}
+                        className={`relative w-16 h-16 rounded-2xl overflow-hidden border-2 transition-all duration-300 flex-shrink-0 ${
+                          currentImageIndex === idx
+                            ? 'border-brand-blue shadow-[0_0_0_3px_rgba(27,63,139,0.15)]'
+                            : 'border-slate-100 hover:border-slate-300 opacity-60 hover:opacity-100'
+                        }`}
+                        aria-label={`View image ${idx + 1}`}
+                      >
+                        <img
+                          src={img}
+                          alt={`${product.name} thumbnail ${idx + 1}`}
+                          className="w-full h-full object-contain p-1.5 bg-white"
+                        />
+                        {currentImageIndex === idx && (
+                          <div className="absolute inset-0 bg-brand-blue/5 rounded-xl" />
+                        )}
+                      </button>
+                    ))}
                   </div>
-                  <div className="absolute -bottom-3 -right-3 bg-white px-4 py-2 rounded-xl shadow-lg border border-slate-50 flex items-center gap-2">
-                     <ShieldCheck className="w-4 h-4 text-brand-blue/30" />
-                     <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none">Pharma Certified</span>
+                )}
+
+                {/* Main Image */}
+                <div className="flex-1 relative">
+                  <div className="aspect-square bg-gradient-to-br from-slate-50 to-white rounded-3xl border border-slate-100 shadow-[0_8px_40px_rgba(0,0,0,0.07)] flex items-center justify-center overflow-hidden relative group">
+                    {/* Corner accents */}
+                    <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-brand-blue/20 rounded-tl-lg pointer-events-none z-10" />
+                    <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-brand-blue/20 rounded-br-lg pointer-events-none z-10" />
+
+                    <AnimatePresence mode="wait">
+                      <motion.img
+                        key={currentImageIndex}
+                        src={product.images?.[currentImageIndex]}
+                        initial={{ opacity: 0, scale: 0.96 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.02 }}
+                        transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                        alt={`${product.name} - View ${currentImageIndex + 1}`}
+                        className="w-full h-full object-contain p-6 drop-shadow-md group-hover:scale-[1.03] transition-transform duration-500"
+                      />
+                    </AnimatePresence>
+
+                    {/* Image counter badge */}
+                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm border border-slate-100 rounded-full px-3 py-1 z-10 shadow-sm">
+                      <span className="text-[10px] font-bold text-slate-400 tracking-widest">
+                        {currentImageIndex + 1}/{product.images?.length}
+                      </span>
+                    </div>
                   </div>
-               </motion.div>
+
+                  {/* Pharma Certified Badge */}
+                  <div className="absolute -bottom-3 -right-2 bg-white px-4 py-2 rounded-2xl shadow-lg border border-slate-100 flex items-center gap-2 z-30">
+                    <ShieldCheck className="w-4 h-4 text-brand-blue/50" />
+                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none">Pharma Certified</span>
+                  </div>
+                </div>
+              </motion.div>
             </div>
 
             {/* Content Stage */}
@@ -140,7 +197,7 @@ export default function ProductDetailClient({ product }: { product: any }) {
       <section className="py-12 sm:py-20 lg:py-24 bg-white">
          <div className="max-w-[1600px] mx-auto px-5 sm:px-10 lg:px-12">
             <div className="border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
-               <AccordionItem title="Description" initialOpen={true}>
+               <AccordionItem title="Description">
                   <div className="pt-2">
                      <h3 className="text-[#386641] font-bold text-xl sm:text-2xl mb-5 tracking-tight">Why {product.name}?</h3>
                      <p className="text-slate-500 text-[15px] sm:text-base leading-relaxed mb-10">

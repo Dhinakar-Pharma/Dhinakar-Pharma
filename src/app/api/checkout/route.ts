@@ -10,7 +10,7 @@ const razorpay = new Razorpay({
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { items, customerName, customerEmail, customerPhone, shippingAddress } = body;
+    const { items, customerName, customerEmail, customerPhone, shippingAddress, prescribingDoctor } = body;
 
     // Security check: We fetch the price directly from the database
     // so users can't manipulate the price from the frontend!
@@ -41,6 +41,7 @@ export async function POST(req: Request) {
         customerEmail: customerEmail || "",
         customerPhone,
         shippingAddress,
+        prescribingDoctor: prescribingDoctor || null,
         totalAmount,
         paymentStatus: "PENDING",
         fulfillmentStatus: "PROCESSING",

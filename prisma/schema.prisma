@@ -19,7 +19,7 @@ model Product {
   focus       String
   tagline     String
   description String
-  image       String
+  images      String[]
   benefits    Json
   nutrition   Json
   faq         Json
@@ -36,6 +36,7 @@ model Order {
   customerEmail     String
   customerPhone     String
   shippingAddress   String
+  prescribingDoctor String?
   totalAmount       Float
   paymentStatus     PaymentStatus @default(PENDING)
   fulfillmentStatus FulfillmentStatus @default(PROCESSING)

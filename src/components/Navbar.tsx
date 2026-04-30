@@ -49,7 +49,7 @@ export default function Navbar() {
                 <img
                   src="/logo.png"
                   alt="Dhinakar Pharma"
-                  className="h-16 md:h-18 w-auto object-contain mix-blend-multiply contrast-[1.2] brightness-[1.1] scale-[1.15] origin-left"
+                  className="h-16 md:h-18 w-auto object-contain mix-blend-multiply contrast-[1.2] brightness-[1.1] scale-[1.5] origin-left transition-transform duration-300 hover:scale-[1.55]"
                 />
               </Link>
             </div>

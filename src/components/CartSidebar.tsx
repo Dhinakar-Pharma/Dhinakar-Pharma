@@ -12,7 +12,7 @@ export default function CartSidebar() {
   const { items, isOpen, setIsOpen, removeItem, updateQuantity, getTotalPrice, clearCart } = useCartStore();
   const [showCheckout, setShowCheckout] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "", address: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "", address: "", doctor: "" });
   
   const [checkoutResult, setCheckoutResult] = useState<CheckoutResult>({ status: "idle" });
 
@@ -37,7 +37,8 @@ export default function CartSidebar() {
           customerName: formData.name,
           customerEmail: formData.email,
           customerPhone: formData.phone,
-          shippingAddress: formData.address
+          shippingAddress: formData.address,
+          prescribingDoctor: formData.doctor
         })
       });
       const data = await res.json();
@@ -208,6 +209,10 @@ export default function CartSidebar() {
               <div>
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Phone Number</label>
                 <input type="tel" placeholder="+91 98765 43210" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-blue focus:ring-1 outline-none transition-all font-medium text-slate-900" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Prescribing Doctor (Optional)</label>
+                <input type="text" placeholder="Dr. Smith" value={formData.doctor} onChange={(e) => setFormData({...formData, doctor: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-blue focus:ring-1 outline-none transition-all font-medium text-slate-900" />
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Full Shipping Address</label>

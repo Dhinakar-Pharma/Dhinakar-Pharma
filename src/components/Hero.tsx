@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 // Array of images for the right-side carousel
 const heroImages = [
@@ -67,10 +68,10 @@ export default function Hero() {
 
   return (
     <section id="home" className="w-full bg-white pt-24 pb-24 relative overflow-hidden">
-      
+
       {/* ── MAIN HERO SECTION ── */}
       <div className="max-w-[1650px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 w-full relative z-10 flex flex-col lg:flex-row items-center gap-12 lg:gap-10 mb-24 lg:mb-32">
-        
+
         {/* TEXT CONTENT - LEFT */}
         <div className="w-full lg:w-1/2 flex flex-col text-center lg:text-left items-center lg:items-start">
           <motion.div
@@ -83,7 +84,7 @@ export default function Hero() {
             <span className="text-brand-blue font-bold tracking-[0.3em] text-[10px] uppercase">Pioneering Healthcare</span>
           </motion.div>
 
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
@@ -91,42 +92,42 @@ export default function Hero() {
           >
             Illuminating Health through <br className="hidden lg:block" /><span style={{ background: "linear-gradient(105deg, #C9A048 10%, #f5e48a 55%, #C9A048 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Science-Driven Formulations</span>
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-lg md:text-xl lg:text-xl text-gray-600 font-sans leading-relaxed mb-12 max-w-2xl"
           >
-            Based in the bulk drug capital of India, we are committed to addressing complex metabolic and reproductive disorders 
+            Based in the bulk drug capital of India, we are committed to addressing complex metabolic and reproductive disorders
             with precision-crafted generic solutions that bridge the gap between quality and accessibility.
           </motion.p>
-          
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
-            <button className="px-10 py-4.5 bg-brand-blue hover:bg-brand-blue-dark rounded-full text-white font-bold uppercase tracking-wider text-[12px] shadow-2xl shadow-brand-blue/30 transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-3">
+            <Link href="/products" className="px-10 py-4.5 bg-brand-blue hover:bg-brand-blue-dark rounded-full text-white font-bold uppercase tracking-wider text-[12px] shadow-2xl shadow-brand-blue/30 transition-all duration-300 transform hover:-translate-y-1 inline-flex items-center justify-center gap-3 w-max">
               Explore Products
               <ArrowRight className="w-4 h-4 text-[#C9A048]" />
-            </button>
+            </Link>
           </motion.div>
         </div>
 
         {/* IMAGE CONTENT - RIGHT */}
         <div className="w-full lg:w-1/2 flex justify-center lg:justify-end relative">
           <motion.div
-             initial={{ opacity: 0, scale: 0.95 }}
-             animate={{ opacity: 1, scale: 1 }}
-             transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
-             className="group relative w-full max-w-2xl lg:max-w-[750px] aspect-[16/10] rounded-[2rem] overflow-hidden border-[12px] lg:border-[16px] border-white shadow-[0_40px_80px_rgba(0,0,0,0.1)] bg-gray-50 flex items-center justify-center"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
+            className="group relative w-full max-w-2xl lg:max-w-[750px] aspect-[16/10] rounded-[2rem] overflow-hidden border-[12px] lg:border-[16px] border-white shadow-[0_40px_80px_rgba(0,0,0,0.1)] bg-gray-50 flex items-center justify-center"
           >
             <AnimatePresence initial={false} custom={direction}>
-              <motion.img 
+              <motion.img
                 key={page}
-                src={heroImages[imageIndex]} 
-                alt="Dhinakar Pharma" 
+                src={heroImages[imageIndex]}
+                alt="Dhinakar Pharma"
                 custom={direction}
                 variants={variants}
                 initial="enter"
@@ -136,17 +137,17 @@ export default function Hero() {
                 className="absolute inset-0 w-full h-full object-cover"
               />
             </AnimatePresence>
-            
+
             <div className="absolute inset-0 bg-gradient-to-t from-brand-blue/20 to-transparent z-10 pointer-events-none" />
 
             {/* Arrow Controls */}
             <div className="absolute inset-y-0 left-0 right-0 z-20 flex items-center justify-between px-6 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-               <button onClick={(e) => { e.stopPropagation(); paginate(-1); }} className="pointer-events-auto p-4 rounded-full bg-white/20 backdrop-blur-md hover:bg-white text-white hover:text-brand-blue shadow-lg transition-all">
-                  <ChevronLeft className="w-5 h-5" />
-               </button>
-               <button onClick={(e) => { e.stopPropagation(); paginate(1); }} className="pointer-events-auto p-4 rounded-full bg-white/20 backdrop-blur-md hover:bg-white text-white hover:text-brand-blue shadow-lg transition-all">
-                  <ChevronRight className="w-5 h-5" />
-               </button>
+              <button onClick={(e) => { e.stopPropagation(); paginate(-1); }} className="pointer-events-auto p-4 rounded-full bg-white/20 backdrop-blur-md hover:bg-white text-white hover:text-brand-blue shadow-lg transition-all">
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); paginate(1); }} className="pointer-events-auto p-4 rounded-full bg-white/20 backdrop-blur-md hover:bg-white text-white hover:text-brand-blue shadow-lg transition-all">
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
           </motion.div>
         </div>
@@ -155,9 +156,9 @@ export default function Hero() {
 
       {/* ── FOCUS AREAS SECTION (AS REQUESTED) ── */}
       <div className="max-w-[1500px] mx-auto px-6 lg:px-12 text-center">
-        
+
         {/* Expertise Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -168,7 +169,7 @@ export default function Hero() {
           <div className="h-px w-12 sm:w-20 bg-gray-200" />
         </motion.div>
 
-        <motion.h2 
+        <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -178,7 +179,7 @@ export default function Hero() {
           Our Focus Areas
         </motion.h2>
 
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
