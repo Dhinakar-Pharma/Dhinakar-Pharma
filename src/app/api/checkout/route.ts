@@ -12,6 +12,14 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { items, customerName, customerEmail, customerPhone, shippingAddress, prescribingDoctor } = body;
 
+    if (!customerEmail) {
+      return NextResponse.json({ error: "Email is required for checkout to apply your discount." }, { status: 400 });
+    }
+
+    if (!prescribingDoctor) {
+      return NextResponse.json({ error: "Prescribing doctor is required." }, { status: 400 });
+    }
+
     // Security check: We fetch the price directly from the database
     // so users can't manipulate the price from the frontend!
     const productIds = items.map((i: any) => i.productId);
@@ -33,6 +41,19 @@ export async function POST(req: Request) {
         priceAtPurchase: product!.price
       };
     });
+
+    // Apply Discount Logic securely on backend
+    let discountPercentage = 0;
+    if (customerEmail) {
+      const previousOrder = await prisma.order.findFirst({
+        where: {
+          customerEmail: customerEmail,
+          paymentStatus: "SUCCESS",
+        }
+      });
+      discountPercentage = previousOrder ? 15 : 20;
+      totalAmount = totalAmount - (totalAmount * (discountPercentage / 100));
+    }
 
     // 1. Create DB Order first with the nested items
     const dbOrder = await prisma.order.create({

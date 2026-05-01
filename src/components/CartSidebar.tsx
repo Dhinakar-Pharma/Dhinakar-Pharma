@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Minus, Plus, Trash2, ShoppingBag, CreditCard, CheckCircle2, XCircle, Package, Truck, Home, Clock } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
@@ -13,14 +13,52 @@ export default function CartSidebar() {
   const [showCheckout, setShowCheckout] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", address: "", doctor: "" });
-  
   const [checkoutResult, setCheckoutResult] = useState<CheckoutResult>({ status: "idle" });
+  
+  const [discountType, setDiscountType] = useState<"none" | "new" | "returning">("none");
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
-  const totalPrice = getTotalPrice();
+  const subtotal = getTotalPrice();
+  let discountAmount = 0;
+  if (discountType === "new") discountAmount = subtotal * 0.20;
+  else if (discountType === "returning") discountAmount = subtotal * 0.15;
+  const finalPrice = subtotal - discountAmount;
+
+  useEffect(() => {
+    const checkEmail = setTimeout(async () => {
+      if (!formData.email || !formData.email.includes("@")) {
+        setDiscountType("none");
+        return;
+      }
+      
+      setIsCheckingEmail(true);
+      try {
+        const res = await fetch("/api/customer-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: formData.email })
+        });
+        const data = await res.json();
+        
+        if (data.isReturningCustomer) {
+          setDiscountType("returning");
+        } else {
+          setDiscountType("new");
+        }
+      } catch (error) {
+        console.error(error);
+        setDiscountType("none");
+      } finally {
+        setIsCheckingEmail(false);
+      }
+    }, 600);
+
+    return () => clearTimeout(checkEmail);
+  }, [formData.email]);
 
   const handlePayment = async () => {
-    if (!formData.name || !formData.phone || !formData.address) {
-      alert("Please fill in your name, phone, and address.");
+    if (!formData.name || !formData.email || !formData.phone || !formData.doctor || !formData.address) {
+      alert("Please fill in your name, email, phone, prescribing doctor, and address.");
       return;
     }
     
@@ -168,7 +206,7 @@ export default function CartSidebar() {
               <div className="p-6 border-t border-slate-100 bg-white">
                 <div className="flex items-center justify-between mb-6">
                   <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Total Amount</span>
-                  <span className="text-2xl font-bold text-brand-blue">₹{totalPrice}</span>
+                  <span className="text-2xl font-bold text-brand-blue">₹{subtotal}</span>
                 </div>
                 
                 <button 
@@ -198,20 +236,57 @@ export default function CartSidebar() {
             </div>
 
             <div className="p-6 flex-grow overflow-y-auto space-y-5">
+              {/* Upfront Advertisement Banner */}
+              {discountType === "none" && (
+                <div className="bg-gradient-to-r from-brand-blue/10 to-brand-blue/5 border border-brand-blue/20 rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center gap-2 text-brand-blue font-bold text-sm mb-1.5">
+                    <span className="text-lg">🎁</span> Unlock Your Discount
+                  </div>
+                  <p className="text-slate-600 text-xs leading-relaxed font-medium">
+                    Enjoy <span className="font-bold text-brand-blue">20% OFF</span> for new customers or <span className="font-bold text-brand-blue">15% OFF</span> if you've ordered before! Enter your email address below to automatically apply your savings.
+                  </p>
+                </div>
+              )}
+
               <div>
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Full Name</label>
                 <input type="text" placeholder="John Doe" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-blue focus:ring-1 outline-none transition-all font-medium text-slate-900" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Email Address (Optional)</label>
-                <input type="email" placeholder="john@example.com" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-blue focus:ring-1 outline-none transition-all font-medium text-slate-900" />
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Email Address *</label>
+                <div className="relative">
+                  <input 
+                    type="email" 
+                    placeholder="john@example.com" 
+                    value={formData.email} 
+                    onChange={(e) => setFormData({...formData, email: e.target.value})} 
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-blue focus:ring-1 outline-none transition-all font-medium text-slate-900 pr-10" 
+                  />
+                  {isCheckingEmail && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-brand-blue border-t-transparent rounded-full animate-spin" />
+                  )}
+                </div>
+                
+                {/* Discount Banners */}
+                <AnimatePresence mode="wait">
+                  {discountType === "new" && (
+                    <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="mt-2 bg-green-50 text-green-700 px-3 py-2 rounded-lg text-[11px] font-bold flex items-center gap-2 border border-green-100">
+                      <span>🎉 20% Welcome Discount Applied!</span>
+                    </motion.div>
+                  )}
+                  {discountType === "returning" && (
+                    <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="mt-2 bg-brand-blue/10 text-brand-blue px-3 py-2 rounded-lg text-[11px] font-bold flex items-center gap-2 border border-brand-blue/20">
+                      <span>👋 Welcome back! 15% Loyalty Discount Applied!</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Phone Number</label>
                 <input type="tel" placeholder="+91 98765 43210" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-blue focus:ring-1 outline-none transition-all font-medium text-slate-900" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Prescribing Doctor (Optional)</label>
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Prescribing Doctor *</label>
                 <input type="text" placeholder="Dr. Smith" value={formData.doctor} onChange={(e) => setFormData({...formData, doctor: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-blue focus:ring-1 outline-none transition-all font-medium text-slate-900" />
               </div>
               <div>
@@ -221,6 +296,12 @@ export default function CartSidebar() {
             </div>
 
             <div className="p-6 border-t border-slate-100 bg-white">
+              {discountType !== "none" && (
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Discount Applied</span>
+                  <span className="text-green-600 font-bold">- ₹{discountAmount.toFixed(2)}</span>
+                </div>
+              )}
               <button 
                 onClick={handlePayment} 
                 disabled={isProcessing}
@@ -231,7 +312,7 @@ export default function CartSidebar() {
                 ) : (
                   <>
                     <CreditCard className="w-4 h-4" />
-                    Pay ₹{totalPrice}
+                    Pay ₹{finalPrice.toFixed(2)}
                   </>
                 )}
               </button>
