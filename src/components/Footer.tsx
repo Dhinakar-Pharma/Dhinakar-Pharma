@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { MapPin, Mail, Phone } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -11,6 +12,32 @@ const navLinks = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname?.startsWith('/admin/print')) return null;
+
+  const isAdmin = pathname?.startsWith('/admin');
+
+  if (isAdmin) {
+    return (
+      <footer className="bg-white border-t border-slate-200 py-6 mt-auto">
+        <div className="w-full px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between text-[11px] uppercase tracking-widest font-bold text-slate-400">
+          <p>© {new Date().getFullYear()} Dhinakar Pharma. Admin Portal.</p>
+          <div className="flex items-center gap-6 mt-4 md:mt-0">
+            <span className="flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              Secure Connection
+            </span>
+            <span className="text-slate-300">|</span>
+            <span className="hover:text-brand-blue transition-colors cursor-pointer text-slate-500">Support</span>
+          </div>
+        </div>
+      </footer>
+    );
+  }
+
   return (
     <footer 
       className="relative overflow-hidden text-white pt-12 pb-8" 

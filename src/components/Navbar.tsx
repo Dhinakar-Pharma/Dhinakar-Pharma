@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ShoppingBag } from "lucide-react";
+import { Menu, X, ShoppingBag, LogOut } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -20,6 +20,13 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await fetch("/api/admin/logout", { method: "POST" });
+    router.push("/admin/login");
+    router.refresh();
+  };
   
   const { items, setIsOpen: setCartOpen } = useCartStore();
   const cartItemCount = items.reduce((total, item) => total + item.quantity, 0);
@@ -37,6 +44,10 @@ export default function Navbar() {
   }, [pathname]);
 
   const isActive = (href: string) => pathname === href;
+  const isAdmin = pathname.startsWith('/admin');
+  const isLogin = pathname.includes('/login');
+
+  if (pathname.startsWith('/admin/print')) return null;
 
   return (
     <>
@@ -45,7 +56,7 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center h-16 md:h-20 w-40 md:w-64">
-              <Link href="/">
+              <Link href={isAdmin ? "/admin" : "/"}>
                 <img
                   src="/logo.png"
                   alt="Dhinakar Pharma"
@@ -55,6 +66,7 @@ export default function Navbar() {
             </div>
 
             {/* Desktop Menu */}
+            {!isAdmin && (
             <div className="hidden md:block pt-2">
               <div className="ml-10 flex items-center space-x-8">
                 {navLinks.map((link) => (
@@ -77,9 +89,17 @@ export default function Navbar() {
                 ))}
               </div>
             </div>
+            )}
 
             <div className="flex items-center gap-4">
+              {isAdmin && !isLogin && (
+                <button onClick={handleLogout} className="flex items-center gap-2 bg-slate-50 text-slate-600 border border-slate-200 px-4 py-2 rounded-lg font-bold text-sm shadow-sm hover:bg-slate-100 transition-colors">
+                  <LogOut className="w-4 h-4" /> Logout
+                </button>
+              )}
+
               {/* Cart Button */}
+              {!isAdmin && (
               <button 
                 onClick={() => setCartOpen(true)}
                 className="relative p-2 text-slate-600 hover:text-brand-blue transition-colors focus:outline-none"
@@ -91,6 +111,7 @@ export default function Navbar() {
                   </span>
                 )}
               </button>
+              )}
 
               {/* Mobile menu button */}
               <div className="md:hidden flex items-center">
@@ -114,7 +135,7 @@ export default function Navbar() {
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
-        {isOpen && (
+        {isOpen && !isAdmin && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

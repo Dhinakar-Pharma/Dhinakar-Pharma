@@ -16,11 +16,8 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Dhinakar Pharma | The Executive Glass",
+  title: "Dhinakar Pharma",
   description: "Pioneering Health with Precision.",
-  icons: {
-    icon: "/logo.jpg",
-  },
 };
 
 export default function RootLayout({
