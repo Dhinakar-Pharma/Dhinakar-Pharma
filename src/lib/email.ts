@@ -1,69 +1,65 @@
-import nodemailer from "nodemailer";
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendOrderReceiptEmail(order: any) {
   try {
-    // Note: You must add these to your .env file
-    const smtpHost = process.env.SMTP_HOST;
-    const smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 465;
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-
-    if (!smtpHost || !smtpUser || !smtpPass) {
-      console.warn("SMTP credentials missing. Skipping email send.");
-      return false;
+    const resendApiKey = process.env.RESEND_API_KEY;
+    
+    if (!resendApiKey) {
+      console.log("Resend API Key missing. Skipping email.");
+      return;
     }
-
-    const transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpPort === 465, // true for 465, false for other ports
-      auth: {
-        user: smtpUser,
-        pass: smtpPass,
-      },
-    });
 
     const trackingLink = `https://dhinakarpharma.in/track?orderId=${order.id}&email=${encodeURIComponent(order.customerEmail)}`;
 
-    const htmlContent = `
-      <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b; background-color: white; padding: 30px; border-radius: 12px; border: 1px solid #e2e8f0;">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <h1 style="color: #1B3F8B; margin: 0;">Dhinakar Pharma</h1>
-        </div>
-        <h2 style="color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">Payment Successful!</h2>
-        <p style="font-size: 16px; line-height: 1.5;">Dear <strong>${order.customerName}</strong>,</p>
-        <p style="font-size: 16px; line-height: 1.5;">Thank you for your purchase from Dhinakar Pharma. Your order <strong>#${order.id.slice(-8).toUpperCase()}</strong> has been securely processed and confirmed.</p>
-        
-        <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #e2e8f0;">
-          <h3 style="margin-top: 0; color: #334155;">Order Summary</h3>
-          <p style="margin: 0; font-size: 15px;"><strong>Total Paid:</strong> <span style="color: #1B3F8B; font-weight: bold; font-size: 18px;">₹${order.totalAmount}</span></p>
-          <p style="margin: 10px 0 0 0; font-size: 15px; line-height: 1.5;"><strong>Shipping To:</strong><br> ${order.shippingAddress}</p>
-        </div>
+    const { data, error } = await resend.emails.send({
+      from: 'Dhinakar Pharma <marketing@dhinakarpharma.in>',
+      to: [order.customerEmail],
+      subject: `Order Confirmed - #${order.id.slice(-6).toUpperCase()}`,
+      html: `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+          <div style="background-color: #1B3F8B; padding: 30px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px; letter-spacing: 1px;">DHINAKAR PHARMA</h1>
+            <p style="color: #cbd5e1; margin-top: 10px; font-size: 14px;">Scientific Excellence in Healthcare</p>
+          </div>
+          
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #1e293b; margin-top: 0;">Order Confirmed!</h2>
+            <p style="color: #475569; line-height: 1.6;">Hello ${order.customerName},</p>
+            <p style="color: #475569; line-height: 1.6;">Thank you for choosing Dhinakar Pharma. Your order has been successfully placed and is now being processed by our clinical team.</p>
+            
+            <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin: 25px 0;">
+              <p style="margin: 0; font-size: 14px; color: #64748b;">Order Number</p>
+              <p style="margin: 5px 0 15px 0; font-weight: bold; color: #1e293b; font-size: 18px;">#${order.id.toUpperCase()}</p>
+              
+              <p style="margin: 0; font-size: 14px; color: #64748b;">Total Amount Paid</p>
+              <p style="margin: 5px 0 0 0; font-weight: bold; color: #1B3F8B; font-size: 18px;">₹${order.totalAmount.toLocaleString('en-IN')}</p>
+            </div>
 
-        <p style="font-size: 16px; line-height: 1.5;">You can track the live status of your shipment using our secure tracking portal by clicking the button below:</p>
-        
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${trackingLink}" style="display: inline-block; background-color: #1B3F8B; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; letter-spacing: 0.5px;">Track Your Order</a>
-        </div>
-        
-        <p style="margin-top: 40px; font-size: 13px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 20px; text-align: center; line-height: 1.5;">
-          If you have any questions, please reply to this email or contact <a href="mailto:info@dhinakarpharma.in" style="color: #1B3F8B;">info@dhinakarpharma.in</a><br>
-          © ${new Date().getFullYear()} Dhinakar Pharma. All rights reserved.
-        </p>
-      </div>
-    `;
+            <div style="margin: 30px 0; text-align: center;">
+              <a href="${trackingLink}" style="background-color: #1B3F8B; color: white; padding: 16px 32px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">Track Your Order</a>
+            </div>
 
-    const info = await transporter.sendMail({
-      from: `"Dhinakar Pharma" <${smtpUser}>`, // sender address
-      to: order.customerEmail, // list of receivers
-      subject: `Order Receipt & Tracking Link - #${order.id.slice(-8).toUpperCase()}`,
-      html: htmlContent,
+            <p style="color: #475569; line-height: 1.6;">Shipping to:<br>
+            <strong style="color: #1e293b;">${order.shippingAddress}</strong></p>
+          </div>
+          
+          <p style="margin: 0; padding: 20px 30px; font-size: 13px; color: #64748b; border-top: 1px solid #e2e8f0; text-align: center; line-height: 1.5; background-color: #f8fafc;">
+            If you have any questions, please reply to this email or contact <a href="mailto:marketing@dhinakarpharma.in" style="color: #1B3F8B;">marketing@dhinakarpharma.in</a><br>
+            © ${new Date().getFullYear()} Dhinakar Pharma. All rights reserved.
+          </p>
+        </div>
+      `,
     });
 
-    console.log("Email sent successfully: %s", info.messageId);
-    return true;
+    if (error) {
+      console.error("Resend Error:", error);
+      return;
+    }
+
+    console.log("Email sent successfully via Resend:", data?.id);
   } catch (error) {
-    console.error("Failed to send email:", error);
-    return false;
+    console.error("Failed to send email via Resend:", error);
   }
 }
