@@ -10,10 +10,10 @@ const razorpay = new Razorpay({
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { items, customerName, customerEmail, customerPhone, shippingAddress, prescribingDoctor } = body;
+    const { items, customerName, customerEmail, customerPhone, shippingAddress, prescribingDoctor, promoCode } = body;
 
     if (!customerEmail) {
-      return NextResponse.json({ error: "Email is required for checkout to apply your discount." }, { status: 400 });
+      return NextResponse.json({ error: "Email is required for checkout." }, { status: 400 });
     }
 
     if (!prescribingDoctor) {
@@ -42,18 +42,20 @@ export async function POST(req: Request) {
       };
     });
 
-    // Apply Discount Logic securely on backend
-    let discountPercentage = 0;
-    if (customerEmail) {
-      const previousOrder = await prisma.order.findFirst({
-        where: {
-          customerEmail: customerEmail,
-          paymentStatus: "SUCCESS",
-        }
-      });
-      discountPercentage = previousOrder ? 15 : 20;
-      totalAmount = totalAmount - (totalAmount * (discountPercentage / 100));
+    // Apply Promo Code Logic securely on backend
+    let discountAmount = 0;
+    if (promoCode === "WELCOME20") {
+      discountAmount = totalAmount * 0.20;
+    } else if (promoCode === "DHINAKAR15") {
+      discountAmount = totalAmount * 0.15;
+    } else if (promoCode === "FLAT500") {
+      discountAmount = 500;
     }
+    
+    // Ensure discount doesn't exceed total amount
+    if (discountAmount > totalAmount) discountAmount = totalAmount;
+    
+    totalAmount = totalAmount - discountAmount;
 
     // 1. Create DB Order first with the nested items
     const dbOrder = await prisma.order.create({

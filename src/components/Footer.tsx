@@ -8,6 +8,7 @@ const navLinks = [
   { name: "Home", href: "/" },
   { name: "Our Values", href: "/values" },
   { name: "Products", href: "/products" },
+  { name: "Track Order", href: "/track" },
   { name: "Why Us", href: "/why-us" },
 ];
 
@@ -103,6 +104,7 @@ export default function Footer() {
         <div className="w-full border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-white/30 text-[10px]">
           <p>© {new Date().getFullYear()} Dhinakar Pharma. All rights reserved.</p>
           <div className="flex items-center gap-8">
+            <Link href="/track" className="hover:text-white/50 transition-colors">Track Your Order</Link>
             <Link href="#" className="hover:text-white/50 transition-colors">Privacy Policy</Link>
             <Link href="#" className="hover:text-white/50 transition-colors">Terms of Service</Link>
             <Link href="#" className="hover:text-white/50 transition-colors">Site Map</Link>

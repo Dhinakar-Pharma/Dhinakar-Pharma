@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
+import { sendOrderReceiptEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
 
     if (generated_signature === razorpay_signature) {
       // 1. Payment is authentic! Update Order to SUCCESS
-      await prisma.order.update({
+      const order = await prisma.order.update({
         where: { id: dbOrderId },
         data: { paymentStatus: "SUCCESS" }
       });
@@ -38,6 +39,9 @@ export async function POST(req: Request) {
           transactionId: razorpay_payment_id // Swap to the actual final payment receipt ID
         }
       });
+
+      // 3. Send Email Receipt automatically
+      await sendOrderReceiptEmail(order);
 
       return NextResponse.json({ success: true });
     } else {

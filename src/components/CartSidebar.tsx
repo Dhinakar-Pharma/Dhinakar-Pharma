@@ -15,46 +15,13 @@ export default function CartSidebar() {
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", address: "", doctor: "" });
   const [checkoutResult, setCheckoutResult] = useState<CheckoutResult>({ status: "idle" });
   
-  const [discountType, setDiscountType] = useState<"none" | "new" | "returning">("none");
-  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<{code: string, discountAmount: number} | null>(null);
+  const [promoError, setPromoError] = useState("");
 
   const subtotal = getTotalPrice();
-  let discountAmount = 0;
-  if (discountType === "new") discountAmount = subtotal * 0.20;
-  else if (discountType === "returning") discountAmount = subtotal * 0.15;
+  const discountAmount = appliedPromo ? appliedPromo.discountAmount : 0;
   const finalPrice = subtotal - discountAmount;
-
-  useEffect(() => {
-    const checkEmail = setTimeout(async () => {
-      if (!formData.email || !formData.email.includes("@")) {
-        setDiscountType("none");
-        return;
-      }
-      
-      setIsCheckingEmail(true);
-      try {
-        const res = await fetch("/api/customer-status", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: formData.email })
-        });
-        const data = await res.json();
-        
-        if (data.isReturningCustomer) {
-          setDiscountType("returning");
-        } else {
-          setDiscountType("new");
-        }
-      } catch (error) {
-        console.error(error);
-        setDiscountType("none");
-      } finally {
-        setIsCheckingEmail(false);
-      }
-    }, 600);
-
-    return () => clearTimeout(checkEmail);
-  }, [formData.email]);
 
   const handlePayment = async () => {
     if (!formData.name || !formData.email || !formData.phone || !formData.doctor || !formData.address) {
@@ -76,7 +43,8 @@ export default function CartSidebar() {
           customerEmail: formData.email,
           customerPhone: formData.phone,
           shippingAddress: formData.address,
-          prescribingDoctor: formData.doctor
+          prescribingDoctor: formData.doctor,
+          promoCode: appliedPromo?.code || null
         })
       });
       const data = await res.json();
@@ -236,17 +204,48 @@ export default function CartSidebar() {
             </div>
 
             <div className="p-6 flex-grow overflow-y-auto space-y-5">
-              {/* Upfront Advertisement Banner */}
-              {discountType === "none" && (
-                <div className="bg-gradient-to-r from-brand-blue/10 to-brand-blue/5 border border-brand-blue/20 rounded-xl p-4 shadow-sm">
-                  <div className="flex items-center gap-2 text-brand-blue font-bold text-sm mb-1.5">
-                    <span className="text-lg">🎁</span> Unlock Your Discount
-                  </div>
-                  <p className="text-slate-600 text-xs leading-relaxed font-medium">
-                    Enjoy <span className="font-bold text-brand-blue">20% OFF</span> for new customers or <span className="font-bold text-brand-blue">15% OFF</span> if you've ordered before! Enter your email address below to automatically apply your savings.
-                  </p>
+              {/* Promo Code Section */}
+              <div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Have a Promo Code?</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                    disabled={appliedPromo !== null}
+                    placeholder="Enter code..." 
+                    className="flex-grow px-4 py-2.5 rounded-lg border border-slate-200 focus:border-brand-blue focus:ring-1 outline-none transition-all font-bold text-slate-900 text-sm uppercase placeholder:normal-case placeholder:font-medium disabled:opacity-50 disabled:bg-slate-100" 
+                  />
+                  {appliedPromo ? (
+                    <button 
+                      onClick={() => { setAppliedPromo(null); setPromoCode(""); }}
+                      className="px-4 py-2.5 bg-red-50 text-red-600 rounded-lg font-bold text-xs hover:bg-red-100 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => {
+                        setPromoError("");
+                        if (promoCode === "WELCOME20") {
+                          setAppliedPromo({ code: "WELCOME20", discountAmount: subtotal * 0.20 });
+                        } else if (promoCode === "DHINAKAR15") {
+                          setAppliedPromo({ code: "DHINAKAR15", discountAmount: subtotal * 0.15 });
+                        } else if (promoCode === "FLAT500") {
+                          setAppliedPromo({ code: "FLAT500", discountAmount: 500 });
+                        } else {
+                          setPromoError("Invalid or expired promo code.");
+                        }
+                      }}
+                      className="px-5 py-2.5 bg-slate-900 text-white rounded-lg font-bold text-xs hover:bg-brand-blue transition-colors shadow-sm"
+                    >
+                      Apply
+                    </button>
+                  )}
                 </div>
-              )}
+                {promoError && <p className="text-red-500 text-[10px] font-bold mt-2">{promoError}</p>}
+                {appliedPromo && <p className="text-green-600 text-[10px] font-bold mt-2 flex items-center gap-1"><span>✅</span> Code applied successfully!</p>}
+              </div>
 
               <div>
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Full Name</label>
@@ -260,26 +259,9 @@ export default function CartSidebar() {
                     placeholder="john@example.com" 
                     value={formData.email} 
                     onChange={(e) => setFormData({...formData, email: e.target.value})} 
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-blue focus:ring-1 outline-none transition-all font-medium text-slate-900 pr-10" 
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-blue focus:ring-1 outline-none transition-all font-medium text-slate-900" 
                   />
-                  {isCheckingEmail && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-brand-blue border-t-transparent rounded-full animate-spin" />
-                  )}
                 </div>
-                
-                {/* Discount Banners */}
-                <AnimatePresence mode="wait">
-                  {discountType === "new" && (
-                    <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="mt-2 bg-green-50 text-green-700 px-3 py-2 rounded-lg text-[11px] font-bold flex items-center gap-2 border border-green-100">
-                      <span>🎉 20% Welcome Discount Applied!</span>
-                    </motion.div>
-                  )}
-                  {discountType === "returning" && (
-                    <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="mt-2 bg-brand-blue/10 text-brand-blue px-3 py-2 rounded-lg text-[11px] font-bold flex items-center gap-2 border border-brand-blue/20">
-                      <span>👋 Welcome back! 15% Loyalty Discount Applied!</span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Phone Number</label>
@@ -296,10 +278,10 @@ export default function CartSidebar() {
             </div>
 
             <div className="p-6 border-t border-slate-100 bg-white">
-              {discountType !== "none" && (
+              {appliedPromo && (
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Discount Applied</span>
-                  <span className="text-green-600 font-bold">- ₹{discountAmount.toFixed(2)}</span>
+                  <span className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Promo Code ({appliedPromo.code})</span>
+                  <span className="text-green-600 font-bold">- ₹{appliedPromo.discountAmount.toFixed(2)}</span>
                 </div>
               )}
               <button 

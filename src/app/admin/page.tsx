@@ -165,7 +165,7 @@ export default function AdminDashboard() {
 
   const exportToCSV = () => {
     const headers = ["Order ID", "Date", "Customer Name", "Email", "Phone", "Address", "Total Amount", "Fulfillment Status"];
-    const rows = filteredOrders.map(order => [
+    const rows = successfulOrders.map(order => [
       order.id,
       new Date(order.createdAt).toLocaleDateString('en-IN'),
       order.customerName,
@@ -185,11 +185,14 @@ export default function AdminDashboard() {
     document.body.removeChild(link);
   };
 
-  const totalRevenue = filteredOrders.reduce((sum, order) => sum + order.totalAmount, 0);
-  const pendingFulfillments = filteredOrders.filter(o => o.fulfillmentStatus === "PROCESSING").length;
+  const successfulOrders = filteredOrders.filter(o => o.paymentStatus === "SUCCESS");
+  const abandonedOrders = filteredOrders.filter(o => o.paymentStatus !== "SUCCESS");
+
+  const totalRevenue = successfulOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+  const pendingFulfillments = successfulOrders.filter(o => o.fulfillmentStatus === "PROCESSING").length;
   
   const productCounts: Record<string, number> = {};
-  filteredOrders.forEach(o => o.items.forEach((i: any) => {
+  successfulOrders.forEach(o => o.items.forEach((i: any) => {
     productCounts[i.product.name] = (productCounts[i.product.name] || 0) + i.quantity;
   }));
   const topSellingArr = Object.entries(productCounts).sort((a,b) => b[1] - a[1]);
@@ -262,6 +265,10 @@ export default function AdminDashboard() {
             <span className="flex items-center gap-3"><Pill className="w-4 h-4" /> Inventory Config</span>
             {activeTab !== 'PRODUCTS' && <ChevronRight className="w-4 h-4 opacity-50" />}
           </button>
+          <button onClick={() => setActiveTab('ABANDONED_CARTS')} className={`flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'ABANDONED_CARTS' ? 'bg-brand-blue text-white shadow-lg shadow-brand-blue/20' : 'text-slate-500 hover:bg-slate-100'}`}>
+            <span className="flex items-center gap-3"><Trash2 className="w-4 h-4" /> Failed Orders</span>
+            {activeTab !== 'ABANDONED_CARTS' && <ChevronRight className="w-4 h-4 opacity-50" />}
+          </button>
         </nav>
       </div>
 
@@ -273,6 +280,7 @@ export default function AdminDashboard() {
           <button onClick={() => setActiveTab('ANALYTICS')} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap ${activeTab === 'ANALYTICS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Analytics</button>
           <button onClick={() => setActiveTab('ORDERS')} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap ${activeTab === 'ORDERS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Orders</button>
           <button onClick={() => setActiveTab('PRODUCTS')} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap ${activeTab === 'PRODUCTS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Inventory</button>
+          <button onClick={() => setActiveTab('ABANDONED_CARTS')} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap ${activeTab === 'ABANDONED_CARTS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Failed Orders</button>
         </div>
 
         {activeTab === 'ANALYTICS' && (
@@ -324,7 +332,7 @@ export default function AdminDashboard() {
             <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
               <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-4 mb-4">Analytics Summary</h3>
               <div className="text-slate-600 text-sm leading-relaxed max-w-2xl">
-                <p className="mb-2">Your current filter is isolating <strong className="text-slate-900">{filteredOrders.length} successful orders</strong>.</p>
+                <p className="mb-2">Your current filter is isolating <strong className="text-slate-900">{successfulOrders.length} successful orders</strong>.</p>
                 <p>To view a different time period or select a custom date (like a specific day from last month), use the unified calendar filter at the top right of this screen. The analytics cards will instantly recalculate.</p>
               </div>
             </div>
@@ -366,7 +374,7 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {filteredOrders.map((order) => (
+                    {successfulOrders.map((order) => (
                       <tr key={order.id} className="hover:bg-slate-50/50 transition-colors">
                         <td className="p-5 align-top">
                           <div className="flex flex-col gap-1">
@@ -473,10 +481,101 @@ export default function AdminDashboard() {
                       </tr>
                     ))}
                     
-                    {filteredOrders.length === 0 && (
+                    {successfulOrders.length === 0 && (
                       <tr>
                         <td colSpan={8} className="p-10 text-center text-slate-400 font-medium">
                           No orders found matching your search or filter.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'ABANDONED_CARTS' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-8">
+              <div>
+                <h1 className="font-serif text-3xl font-bold text-slate-900">Failed & Pending Orders</h1>
+                <p className="text-slate-500 mt-1 font-medium text-sm">Follow up with these customers to recover lost sales.</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <DateFilterUI />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden w-full">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[1000px]">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-widest font-bold">
+                      <th className="p-5 whitespace-nowrap">Order ID & Date</th>
+                      <th className="p-5 whitespace-nowrap min-w-[150px]">Customer Info</th>
+                      <th className="p-5 whitespace-nowrap min-w-[200px]">Items & Value</th>
+                      <th className="p-5 whitespace-nowrap">Status</th>
+                      <th className="p-5 whitespace-nowrap">Action Needed</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {abandonedOrders.map((order) => (
+                      <tr key={order.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-5 align-top">
+                          <div className="flex flex-col gap-1">
+                            <span className="font-mono text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded inline-block w-fit">
+                              #{order.id.slice(-8).toUpperCase()}
+                            </span>
+                            <span className="text-xs text-slate-500 mt-2 font-medium">
+                              {new Date(order.createdAt).toLocaleDateString('en-IN')}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-5 align-top">
+                          <div className="flex items-start gap-2">
+                            <User className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                            <div>
+                              <p className="font-bold text-slate-800 text-sm">{order.customerName}</p>
+                              <p className="text-xs text-slate-500">{order.customerEmail}</p>
+                              <p className="text-xs text-slate-500">{order.customerPhone}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-5 align-top">
+                          <div className="flex flex-col gap-2">
+                            <span className="font-bold text-slate-900">₹{order.totalAmount}</span>
+                            <span className="text-xs text-slate-500">{order.items.length} item(s)</span>
+                          </div>
+                        </td>
+                        <td className="p-5 align-top">
+                          <div className="flex flex-col gap-2">
+                            {order.paymentStatus === "FAILED" ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-red-700 bg-red-100 px-2 py-1 rounded w-fit">
+                                Failed
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-amber-700 bg-amber-100 px-2 py-1 rounded w-fit">
+                                Pending
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-5 align-top">
+                          <button 
+                            onClick={() => window.location.href = `mailto:${order.customerEmail}?subject=Dhinakar Pharma - Need help with your order?`}
+                            className="text-xs font-bold bg-brand-blue/10 text-brand-blue px-3 py-2 rounded-lg hover:bg-brand-blue/20 transition-colors"
+                          >
+                            Email Customer
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    
+                    {abandonedOrders.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="p-10 text-center text-slate-400 font-medium">
+                          No failed or pending orders found.
                         </td>
                       </tr>
                     )}
