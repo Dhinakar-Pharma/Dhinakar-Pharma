@@ -63,3 +63,66 @@ export async function sendOrderReceiptEmail(order: any) {
     console.error("Failed to send email via Resend:", error);
   }
 }
+
+export async function sendOrderStatusUpdateEmail(order: any) {
+  try {
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) return;
+
+    const status = order.fulfillmentStatus;
+    let subject = "";
+    let headline = "";
+    let message = "";
+
+    if (status === "SHIPPED") {
+      subject = `Order Shipped - #${order.id.slice(-6).toUpperCase()}`;
+      headline = "On Its Way!";
+      message = "Your Dhinakar Pharma order has been dispatched and is currently in transit to your location.";
+    } else if (status === "DELIVERED") {
+      subject = `Order Delivered - #${order.id.slice(-6).toUpperCase()}`;
+      headline = "Successfully Delivered!";
+      message = "Your Dhinakar Pharma order has been successfully delivered. We hope our products meet your clinical expectations.";
+    } else {
+      return;
+    }
+
+    const trackingLink = `https://dhinakarpharma.in/track?orderId=${order.id}&email=${encodeURIComponent(order.customerEmail)}`;
+
+    await resend.emails.send({
+      from: 'Dhinakar Pharma <marketing@dhinakarpharma.in>',
+      to: [order.customerEmail],
+      subject: subject,
+      html: `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+          <div style="background-color: #1B3F8B; padding: 30px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px; letter-spacing: 1px;">DHINAKAR PHARMA</h1>
+          </div>
+          
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #1e293b; margin-top: 0;">${headline}</h2>
+            <p style="color: #475569; line-height: 1.6;">Hello ${order.customerName},</p>
+            <p style="color: #475569; line-height: 1.6;">${message}</p>
+            
+            <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin: 25px 0;">
+              <p style="margin: 0; font-size: 14px; color: #64748b;">Order Number</p>
+              <p style="margin: 5px 0 0 0; font-weight: bold; color: #1e293b; font-size: 18px;">#${order.id.toUpperCase()}</p>
+            </div>
+
+            <div style="margin: 30px 0; text-align: center;">
+              <a href="${trackingLink}" style="background-color: #1B3F8B; color: white; padding: 16px 32px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">View Order Status</a>
+            </div>
+          </div>
+          
+          <p style="margin: 0; padding: 20px 30px; font-size: 13px; color: #64748b; border-top: 1px solid #e2e8f0; text-align: center; line-height: 1.5; background-color: #f8fafc;">
+            If you have any questions, please reply to this email or contact <a href="mailto:marketing@dhinakarpharma.in" style="color: #1B3F8B;">marketing@dhinakarpharma.in</a>
+          </p>
+        </div>
+      `,
+    });
+
+    console.log(`Status update email (${status}) sent for order:`, order.id);
+  } catch (error) {
+    console.error("Failed to send status update email:", error);
+  }
+}
+

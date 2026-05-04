@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendOrderStatusUpdateEmail } from "@/lib/email";
 
 export async function GET() {
   try {
@@ -31,6 +32,9 @@ export async function PATCH(req: Request) {
       where: { id: orderId },
       data: { fulfillmentStatus }
     });
+
+    // Send update email to customer
+    await sendOrderStatusUpdateEmail(order);
     return NextResponse.json(order);
   } catch (error) {
     console.error(error);

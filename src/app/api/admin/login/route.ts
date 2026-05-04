@@ -4,8 +4,13 @@ import { cookies } from "next/headers";
 export async function POST(req: Request) {
   try {
     const { username, password } = await req.json();
-    const expectedUser = process.env.ADMIN_USERNAME || 'admin';
-    const expectedPwd = process.env.ADMIN_PASSWORD || 'pharma123';
+    const expectedUser = process.env.ADMIN_USERNAME;
+    const expectedPwd = process.env.ADMIN_PASSWORD;
+
+    if (!expectedUser || !expectedPwd) {
+      console.error("Admin credentials not configured in environment variables");
+      return NextResponse.json({ error: "Configuration error" }, { status: 500 });
+    }
 
     if (username === expectedUser && password === expectedPwd) {
       const cookieStore = await cookies();
