@@ -9,7 +9,7 @@ const navLinks = [
   { name: "Our Values", href: "/values" },
   { name: "Products", href: "/products" },
   { name: "Track Order", href: "/track" },
-  { name: "Why Us", href: "/why-us" },
+  { name: "From the Manufacturers", href: "/from-the-manufacturers" },
 ];
 
 export default function Footer() {

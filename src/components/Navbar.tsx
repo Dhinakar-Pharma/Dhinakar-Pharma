@@ -10,7 +10,7 @@ const navLinks = [
   { name: "Home", href: "/" },
   { name: "Our Values", href: "/values" },
   { name: "Products", href: "/products" },
-  { name: "Why Us", href: "/why-us" },
+  { name: "From the Manufacturers", href: "/from-the-manufacturers" },
 ];
 
 import { useCartStore } from "@/store/cartStore";
