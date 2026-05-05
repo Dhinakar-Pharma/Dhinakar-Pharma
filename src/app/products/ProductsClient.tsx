@@ -222,7 +222,9 @@ function ProductSection({ product, index }: { product: any, index: number }) {
               </h2>
 
               <p className="text-gray-500 text-xl lg:text-2xl font-medium mb-10 font-sans italic">"{product.tagline}"</p>
-              <p className="text-gray-600 text-base lg:text-lg leading-[1.8] mb-12 max-w-xl">{product.description}</p>
+              <p className="text-gray-600 text-base lg:text-lg leading-[1.8] mb-12 max-w-xl line-clamp-2">
+                {product.description?.split('\n')[0]}
+              </p>
 
               <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-[0_30px_60px_rgba(0,0,0,0.03)] p-10 lg:p-14 mb-12 relative overflow-hidden">
                 <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-gold-dark/5 rounded-full blur-3xl" />

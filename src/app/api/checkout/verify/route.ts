@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, dbOrderId } = body;
 
-    const secret = process.env.RAZORPAY_KEY_SECRET as string;
+    const secret = (process.env.RAZORPAY_KEY_SECRET as string)?.trim();
 
     console.log("--- VERIFYING PAYMENT ---");
     console.log("Order ID:", razorpay_order_id);

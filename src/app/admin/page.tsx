@@ -656,20 +656,38 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    {/* Benefits Builder */}
-                    <div className="bg-slate-50 p-5 rounded-xl border border-slate-100">
-                      <div className="flex items-center justify-between mb-4">
-                        <label className="block text-[11px] uppercase tracking-widest font-bold text-slate-400">Benefits</label>
-                        <button onClick={() => addArrayItem('benefits', '')} className="flex items-center gap-1 text-[10px] font-bold text-brand-blue bg-blue-100/50 px-2 py-1.5 rounded hover:bg-blue-100"><Plus className="w-3 h-3" /> Add Benefit</button>
+                    {/* Highlights / Bullet Points Builder */}
+                    <div className="bg-blue-50/30 p-6 rounded-2xl border border-blue-100/50 shadow-sm">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+                        <div>
+                          <label className="block text-[11px] uppercase tracking-widest font-bold text-brand-blue mb-1">Key Highlights & Bullet Points</label>
+                          <p className="text-[10px] text-slate-400 font-medium italic">Add clinical points, features, or unique formulation details here.</p>
+                        </div>
+                        <button onClick={() => addArrayItem('benefits', '')} className="flex items-center justify-center gap-2 text-[10px] font-bold text-brand-blue bg-white border border-brand-blue/20 px-3 py-2 rounded-xl hover:bg-brand-blue hover:text-white transition-all shadow-sm">
+                          <Plus className="w-3.5 h-3.5" /> Add New Point
+                        </button>
                       </div>
                       <div className="space-y-3">
                         {formData.benefits?.map((item: string, i: number) => (
-                          <div key={i} className="flex gap-2">
-                            <input type="text" value={item} onChange={(e) => handleArrayChange('benefits', i, e.target.value)} placeholder="e.g. Supports heart health" className="flex-1 p-2 border border-slate-200 rounded-lg text-sm font-medium focus:border-brand-blue outline-none" />
-                            <button onClick={() => removeArrayItem('benefits', i)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          <div key={i} className="flex gap-2 group">
+                            <div className="w-8 h-10 flex items-center justify-center text-[10px] font-black text-slate-300 bg-white border border-slate-100 rounded-lg shrink-0">
+                              {i + 1}
+                            </div>
+                            <input 
+                              type="text" 
+                              value={item} 
+                              onChange={(e) => handleArrayChange('benefits', i, e.target.value)} 
+                              placeholder="e.g. Unique Proprietary formulation for bone health" 
+                              className="flex-1 p-3 border border-slate-200 rounded-xl text-sm font-medium focus:border-brand-blue focus:ring-4 focus:ring-brand-blue/5 outline-none bg-white transition-all" 
+                            />
+                            <button onClick={() => removeArrayItem('benefits', i)} className="p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"><Trash2 className="w-4 h-4" /></button>
                           </div>
                         ))}
-                        {formData.benefits?.length === 0 && <p className="text-xs text-slate-400 italic">No benefits added.</p>}
+                        {formData.benefits?.length === 0 && (
+                          <div className="text-center py-6 border-2 border-dashed border-slate-100 rounded-2xl">
+                             <p className="text-xs text-slate-400 font-medium">No highlights added yet. Click 'Add New Point' to begin.</p>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -691,25 +709,40 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Nutrition Builder */}
-                    <div className="bg-slate-50 p-5 rounded-xl border border-slate-100">
-                      <div className="flex items-center justify-between mb-4">
-                        <label className="block text-[11px] uppercase tracking-widest font-bold text-slate-400">Nutrition Facts</label>
-                        <button onClick={() => addArrayItem('nutrition', { component: '', amount: '' })} className="flex items-center gap-1 text-[10px] font-bold text-brand-blue bg-blue-100/50 px-2 py-1.5 rounded hover:bg-blue-100"><Plus className="w-3 h-3" /> Add Fact</button>
+                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
+                        <div>
+                          <label className="block text-[11px] uppercase tracking-widest font-bold text-slate-400">Nutritional Information Builder</label>
+                          <p className="text-[10px] text-slate-400 font-medium">Add composition, claim amount, and RDA percentage.</p>
+                        </div>
+                        <button onClick={() => addArrayItem('nutrition', { component: '', amount: '', rda: '' })} className="flex items-center justify-center gap-2 text-[10px] font-bold text-brand-blue bg-white border border-brand-blue/20 px-3 py-2 rounded-xl hover:bg-brand-blue hover:text-white transition-all shadow-sm">
+                          <Plus className="w-3.5 h-3.5" /> Add Row
+                        </button>
                       </div>
                       <div className="space-y-3">
+                        {/* Table Header for Admin - Aligned with Grid */}
+                        {formData.nutrition?.length > 0 && (
+                          <div className="grid grid-cols-[2fr_1fr_1fr_40px] gap-3 px-1 mb-1">
+                            <div className="text-[9px] font-black uppercase text-slate-400 tracking-tighter">Composition</div>
+                            <div className="text-[9px] font-black uppercase text-slate-400 tracking-tighter">Claim/Tablet</div>
+                            <div className="text-[9px] font-black uppercase text-slate-400 tracking-tighter">% RDA*</div>
+                            <div></div>
+                          </div>
+                        )}
                         {formData.nutrition?.map((item: any, i: number) => (
-                          <div key={i} className="flex gap-2">
-                            <input type="text" value={item.component || ''} onChange={(e) => handleObjectArrayChange('nutrition', i, 'component', e.target.value)} placeholder="Component (e.g. Calcium)" className="flex-1 p-2 border border-slate-200 rounded-lg text-sm font-medium focus:border-brand-blue outline-none" />
-                            <input type="text" value={item.amount || ''} onChange={(e) => handleObjectArrayChange('nutrition', i, 'amount', e.target.value)} placeholder="Amount (e.g. 500mg)" className="flex-1 p-2 border border-slate-200 rounded-lg text-sm font-medium focus:border-brand-blue outline-none" />
-                            <button onClick={() => removeArrayItem('nutrition', i)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          <div key={i} className="grid grid-cols-[2fr_1fr_1fr_40px] gap-3 group items-center">
+                            <input type="text" value={item.component || ''} onChange={(e) => handleObjectArrayChange('nutrition', i, 'component', e.target.value)} placeholder="e.g. Calcium" className="w-full p-2.5 border border-slate-200 rounded-lg text-sm font-medium focus:border-brand-blue outline-none bg-white shadow-sm" />
+                            <input type="text" value={item.amount || ''} onChange={(e) => handleObjectArrayChange('nutrition', i, 'amount', e.target.value)} placeholder="e.g. 500mg" className="w-full p-2.5 border border-slate-200 rounded-lg text-sm font-bold focus:border-brand-blue outline-none bg-white shadow-sm" />
+                            <input type="text" value={item.rda || ''} onChange={(e) => handleObjectArrayChange('nutrition', i, 'rda', e.target.value)} placeholder="e.g. 50%" className="w-full p-2.5 border border-slate-200 rounded-lg text-sm font-bold text-brand-blue focus:border-brand-blue outline-none bg-white shadow-sm" />
+                            <button onClick={() => removeArrayItem('nutrition', i)} className="p-2.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all flex items-center justify-center"><Trash2 className="w-4 h-4" /></button>
                           </div>
                         ))}
-                        {formData.nutrition?.length === 0 && <p className="text-xs text-slate-400 italic">No nutrition facts added.</p>}
+                        {formData.nutrition?.length === 0 && <p className="text-xs text-slate-400 italic text-center py-4">No nutritional data added.</p>}
                       </div>
                     </div>
 
                     {/* FAQ Builder */}
-                    <div className="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
                       <div className="flex items-center justify-between mb-4">
                         <label className="block text-[11px] uppercase tracking-widest font-bold text-slate-400">FAQs</label>
                         <button onClick={() => addArrayItem('faq', { question: '', answer: '' })} className="flex items-center gap-1 text-[10px] font-bold text-brand-blue bg-blue-100/50 px-2 py-1.5 rounded hover:bg-blue-100"><Plus className="w-3 h-3" /> Add FAQ</button>

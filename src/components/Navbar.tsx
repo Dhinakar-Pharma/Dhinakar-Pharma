@@ -51,84 +51,91 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`fixed top-0 w-full z-50 bg-white transition-all duration-300 border-b ${isScrolled ? "border-gray-200 shadow-sm" : "border-transparent"}`}>
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-          <div className="flex items-center justify-between h-16 md:h-20">
-            {/* Logo */}
-            <div className="flex-shrink-0 flex items-center h-16 md:h-20 w-40 md:w-64">
-              <Link href={isAdmin ? "/admin" : "/"}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${
+        isScrolled 
+          ? "pt-6 px-4 sm:px-6 lg:px-12" 
+          : "pt-0 px-0"
+      }`}>
+        <div className={`mx-auto transition-all duration-500 ease-in-out ${
+          isScrolled 
+            ? "max-w-7xl bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-white/40 px-8 lg:px-12" 
+            : "max-w-full bg-white border-b border-gray-100 px-6 lg:px-16"
+        }`}>
+          <div className={`flex items-center justify-between transition-all duration-500 ${
+            isScrolled ? "h-16 md:h-20" : "h-20 md:h-24"
+          }`}>
+            {/* Logo Section */}
+            <div className="flex-shrink-0 flex items-center h-full group">
+              <Link href={isAdmin ? "/admin" : "/"} className="relative">
                 <img
                   src="/logo.png"
                   alt="Dhinakar Pharma"
-                  className="h-16 md:h-18 w-auto object-contain mix-blend-multiply contrast-[1.2] brightness-[1.1] scale-[1.5] origin-left transition-transform duration-300 hover:scale-[1.55]"
+                  className={`w-auto object-contain mix-blend-multiply contrast-[1.1] transition-all duration-500 ${
+                    isScrolled ? "h-12 md:h-14 scale-[1.3]" : "h-16 md:h-18 scale-[1.6]"
+                  } origin-left group-hover:brightness-110`}
                 />
               </Link>
             </div>
 
             {/* Desktop Menu */}
             {!isAdmin && (
-            <div className="hidden md:block pt-2">
-              <div className="ml-10 flex items-center space-x-8">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    className={`cursor-pointer group relative px-5 py-2 text-[13px] font-bold uppercase tracking-[0.15em] transition-all duration-300 ${isActive(link.href)
-                        ? "text-brand-blue"
-                        : "text-gray-500 hover:text-brand-blue"
+              <div className="hidden md:block">
+                <div className="flex items-center space-x-2">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      className={`cursor-pointer group relative px-6 py-2 text-[12px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${
+                        isActive(link.href) ? "text-brand-blue" : "text-gray-400 hover:text-brand-blue"
                       }`}
-                  >
-                    {link.name}
-                    <span
-                      className={`absolute -bottom-2 left-1/2 h-[2px] bg-gold-dark transform -translate-x-1/2 transition-all duration-500 ease-out rounded-full ${isActive(link.href)
-                          ? "w-1/2 opacity-100"
-                          : "w-0 opacity-0 group-hover:w-1/2 group-hover:opacity-100"
-                        }`}
-                    />
-                  </Link>
-                ))}
+                    >
+                      {link.name}
+                      {/* Scientific Indicator */}
+                      <span className={`absolute top-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#C9A048] transition-all duration-500 ${
+                        isActive(link.href) ? "opacity-100 scale-100" : "opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100"
+                      }`} />
+                      <span className={`absolute -bottom-1 left-1/2 h-[1px] bg-brand-blue/30 transform -translate-x-1/2 transition-all duration-500 ${
+                        isActive(link.href) ? "w-1/2 opacity-100" : "w-0 opacity-0 group-hover:w-1/3 group-hover:opacity-100"
+                      }`} />
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
             )}
 
-            <div className="flex items-center gap-4">
+            {/* Action Section */}
+            <div className="flex items-center gap-6">
               {isAdmin && !isLogin && (
-                <button onClick={handleLogout} className="flex items-center gap-2 bg-slate-50 text-slate-600 border border-slate-200 px-4 py-2 rounded-lg font-bold text-sm shadow-sm hover:bg-slate-100 transition-colors">
-                  <LogOut className="w-4 h-4" /> Logout
+                <button onClick={handleLogout} className="flex items-center gap-2 bg-slate-50 text-slate-600 border border-slate-200 px-4 py-2 rounded-xl font-bold text-[11px] uppercase tracking-wider shadow-sm hover:bg-slate-100 transition-all">
+                  <LogOut className="w-3.5 h-3.5" /> Logout
                 </button>
               )}
 
               {/* Cart Button */}
               {!isAdmin && (
-              <button 
-                onClick={() => setCartOpen(true)}
-                className="relative p-2 text-slate-600 hover:text-brand-blue transition-colors focus:outline-none"
-              >
-                <ShoppingBag className="w-6 h-6" />
-                {cartItemCount > 0 && (
-                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-brand-blue rounded-full shadow-sm">
-                    {cartItemCount}
-                  </span>
-                )}
-              </button>
+                <button 
+                  onClick={() => setCartOpen(true)}
+                  className="relative p-2.5 text-gray-400 hover:text-brand-blue transition-all duration-300 transform hover:scale-110"
+                >
+                  <ShoppingBag className="w-6 h-6" strokeWidth={1.5} />
+                  {cartItemCount > 0 && (
+                    <span className="absolute top-1 right-1 inline-flex items-center justify-center min-w-[18px] h-[18px] text-[9px] font-black leading-none text-white bg-brand-blue rounded-full shadow-lg border-2 border-white">
+                      {cartItemCount}
+                    </span>
+                  )}
+                </button>
               )}
 
-              {/* Mobile menu button */}
+              {/* Mobile menu toggle */}
               <div className="md:hidden flex items-center">
                 <button
                   onClick={() => setIsOpen(!isOpen)}
-                  className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-brand-blue focus:outline-none"
+                  className="p-2 rounded-xl text-gray-500 hover:bg-gray-50 transition-colors"
                 >
-                  <span className="sr-only">Open main menu</span>
-                  {isOpen ? (
-                    <X className="block h-6 w-6" aria-hidden="true" />
-                  ) : (
-                    <Menu className="block h-6 w-6" aria-hidden="true" />
-                  )}
+                  {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                 </button>
               </div>
             </div>
-
           </div>
         </div>
       </nav>

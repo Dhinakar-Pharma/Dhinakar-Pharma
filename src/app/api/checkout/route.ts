@@ -3,8 +3,8 @@ import Razorpay from "razorpay";
 import { prisma } from "@/lib/prisma";
 
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID as string,
-  key_secret: process.env.RAZORPAY_KEY_SECRET as string,
+  key_id: (process.env.RAZORPAY_KEY_ID as string)?.trim(),
+  key_secret: (process.env.RAZORPAY_KEY_SECRET as string)?.trim(),
 });
 
 export async function POST(req: Request) {

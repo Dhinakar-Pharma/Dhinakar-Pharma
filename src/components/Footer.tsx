@@ -51,13 +51,16 @@ export default function Footer() {
 
       <div className="relative z-10 max-w-4xl mx-auto px-6 flex flex-col items-center text-center">
 
-        {/* 1. Logo Card */}
-        <div className="bg-white p-2 rounded-2xl shadow-xl mb-6 flex items-center justify-center w-20 h-20 overflow-hidden">
-          <img
-            src="/footer_logo.png"
-            alt="Dhinakar Pharma"
-            className="w-full h-full object-contain mix-blend-multiply contrast-[1.1] scale-[1.25]"
-          />
+        {/* 1. Logo Section */}
+        <div className="mb-6 relative group">
+          <div className="absolute inset-0 bg-white/20 blur-2xl rounded-full scale-110 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="relative w-24 h-24 md:w-28 md:h-28 bg-white/10 backdrop-blur-md rounded-full border border-white/20 p-4 flex items-center justify-center shadow-2xl transition-transform duration-500 hover:scale-105">
+            <img
+              src="/logo.png"
+              alt="Dhinakar Pharma"
+              className="w-full h-full object-contain mix-blend-multiply contrast-[1.1] scale-[1.5]"
+            />
+          </div>
         </div>
 
         {/* 2. Tagline */}
@@ -84,19 +87,24 @@ export default function Footer() {
 
         {/* 6. Contact Row */}
         <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-white/60 text-[12px] mb-10">
-          <div className="flex items-center gap-2.5">
-            <MapPin className="w-4 h-4 text-blue-300 opacity-50" />
-            <span>Hyderabad, India</span>
+          <div className="flex items-start gap-2.5 max-w-[280px]">
+            <MapPin className="w-4 h-4 text-blue-300 opacity-50 shrink-0 mt-0.5" />
+            <span className="text-left leading-relaxed">
+              Plot no 556,
+              <br /> Sri Govinda Nilayam,
+              <br /> OU colony, Shaikpet,
+              <br /> Hyderabad - 500008
+            </span>
           </div>
           <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-white/10" />
           <div className="flex items-center gap-2.5">
             <Phone className="w-4 h-4 text-blue-300 opacity-50" />
-            <span>+91 9949855889</span>
+            <span>+91-9949855889</span>
           </div>
           <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-white/10" />
           <div className="flex items-center gap-2.5">
             <Mail className="w-4 h-4 text-blue-300 opacity-50" />
-            <span>marketing@dhinakarpharma.in</span>
+            <span>business@dhinakarpharma.in</span>
           </div>
         </div>
 

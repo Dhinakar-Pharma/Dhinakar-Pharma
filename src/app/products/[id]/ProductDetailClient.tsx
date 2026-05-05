@@ -145,12 +145,16 @@ export default function ProductDetailClient({ product }: { product: any }) {
                     <span className="text-xs text-slate-400 font-medium uppercase tracking-widest">Per Pack</span>
                   </div>
 
-                  <p className="text-slate-500 text-base sm:text-lg mb-8 leading-relaxed font-medium">
+                  <p className="text-slate-500 text-base sm:text-lg mb-4 leading-relaxed font-medium">
                     {product.tagline}
                   </p>
 
+                  <p className="text-slate-400 text-sm sm:text-[15px] mb-8 leading-relaxed max-w-xl">
+                    {product.description?.split('\n')[0]}
+                  </p>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-8 mb-10">
-                    {(product.benefits as string[]).map((benefit, i) => (
+                    {(product.benefits as string[]).slice(0, 4).map((benefit, i) => (
                       <div key={i} className="flex gap-3 items-start">
                          <CheckCircle2 className="w-4 h-4 text-gold-dark mt-0.5 shrink-0" />
                          <p className="text-slate-600 text-[14px] sm:text-[15px] font-medium leading-snug">{benefit}</p>
@@ -199,18 +203,14 @@ export default function ProductDetailClient({ product }: { product: any }) {
             <div className="border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
                <AccordionItem title="Description">
                   <div className="pt-2">
-                     <h3 className="text-[#386641] font-bold text-xl sm:text-2xl mb-5 tracking-tight">Why {product.name}?</h3>
-                     <p className="text-slate-500 text-[15px] sm:text-base leading-relaxed mb-10">
-                       {product.description}
-                     </p>
-
-                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8 mb-10">
-                        {(product.nutrition as any[]).slice(0, 6).map((item: any) => (
-                          <div key={item.component} className="flex gap-4">
-                             <div className="w-1.5 h-1.5 rounded-full bg-slate-200 mt-2 shrink-0" />
-                             <div>
-                                <h4 className="text-slate-900 font-bold text-[14px] sm:text-[15px] mb-1 leading-tight">{item.component}</h4>
-                             </div>
+                     <h3 className="text-[#386641] font-bold text-xl sm:text-2xl mb-5 tracking-tight">About {product.name}</h3>
+                     <div className="space-y-4">
+                        {product.description?.split('\n').filter((line: string) => line.trim() !== '').map((line: string, i: number) => (
+                          <div key={i} className="flex gap-3 items-start">
+                             <div className="w-1.5 h-1.5 rounded-full bg-brand-blue/40 mt-2 shrink-0" />
+                             <p className="text-slate-600 text-[14px] sm:text-[15px] font-medium leading-relaxed">
+                               {line.startsWith('*') || line.startsWith('-') ? line.substring(1).trim() : line.trim()}
+                             </p>
                           </div>
                         ))}
                      </div>
@@ -222,20 +222,23 @@ export default function ProductDetailClient({ product }: { product: any }) {
                      <table className="w-full text-left font-sans">
                         <thead className="bg-[#F8FAFC]">
                            <tr>
-                              <th className="px-6 sm:px-10 py-5 font-black text-brand-blue uppercase tracking-widest text-[9px] sm:text-[10px]">Component</th>
-                              <th className="px-6 sm:px-10 py-5 font-black text-brand-blue uppercase tracking-widest text-[9px] sm:text-[10px]">Amount</th>
+                              <th className="px-6 sm:px-10 py-5 font-black text-brand-blue uppercase tracking-widest text-[9px] sm:text-[10px]">Approximate Composition</th>
+                              <th className="px-6 sm:px-10 py-5 font-black text-brand-blue uppercase tracking-widest text-[9px] sm:text-[10px]">Claim per Tablet</th>
+                              <th className="px-6 sm:px-10 py-5 font-black text-brand-blue uppercase tracking-widest text-[9px] sm:text-[10px]">% RDA*</th>
                            </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                           {(product.nutrition as any[]).map((item: any) => (
-                             <tr key={item.component} className="hover:bg-slate-50/50 transition-colors">
-                                <td className="px-6 sm:px-10 py-5 font-bold text-slate-700 text-[14px] sm:text-[15px]">{item.component}</td>
-                                <td className="px-6 sm:px-10 py-5 font-extrabold text-brand-blue text-[14px] sm:text-[15px]">{item.amount}</td>
+                           {(product.nutrition as any[]).map((item: any, i: number) => (
+                             <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                                <td className="px-6 sm:px-10 py-5 font-bold text-slate-700 text-[13px] sm:text-[14px]">{item.component}</td>
+                                <td className="px-6 sm:px-10 py-5 font-extrabold text-slate-900 text-[13px] sm:text-[14px]">{item.amount}</td>
+                                <td className="px-6 sm:px-10 py-5 font-black text-brand-blue text-[13px] sm:text-[14px]">{item.rda || "-"}</td>
                              </tr>
                            ))}
                         </tbody>
                      </table>
                   </div>
+                  <p className="mt-4 text-[10px] text-slate-400 font-medium italic pl-6">* % RDA (Recommended Dietary Allowance) values are based on ICMR guidelines.</p>
                </AccordionItem>
 
                <AccordionItem title="FAQ">
