@@ -40,8 +40,8 @@ export default function Footer() {
   }
 
   return (
-    <footer 
-      className="relative overflow-hidden text-white pt-12 pb-8" 
+    <footer
+      className="relative overflow-hidden text-white pt-12 pb-8"
       style={{ background: "linear-gradient(150deg, #0c2160 0%, #1B3F8B 60%, #2460aa 100%)" }}
     >
       {/* Decorative background elements */}
@@ -50,7 +50,7 @@ export default function Footer() {
       <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full border border-white/[0.04]" />
 
       <div className="relative z-10 max-w-4xl mx-auto px-6 flex flex-col items-center text-center">
-        
+
         {/* 1. Logo Card */}
         <div className="bg-white p-2 rounded-2xl shadow-xl mb-6 flex items-center justify-center w-20 h-20 overflow-hidden">
           <img
@@ -91,12 +91,12 @@ export default function Footer() {
           <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-white/10" />
           <div className="flex items-center gap-2.5">
             <Phone className="w-4 h-4 text-blue-300 opacity-50" />
-            <span>+91 40 4000 0000</span>
+            <span>+91 9949855889</span>
           </div>
           <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-white/10" />
           <div className="flex items-center gap-2.5">
             <Mail className="w-4 h-4 text-blue-300 opacity-50" />
-            <span>info@dhinakarpharma.in</span>
+            <span>marketing@dhinakarpharma.in</span>
           </div>
         </div>
 

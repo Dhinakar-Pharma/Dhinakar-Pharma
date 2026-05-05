@@ -90,7 +90,7 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.1 }}
             className="text-4xl sm:text-5xl lg:text-6xl xl:text-[4.75rem] font-serif font-bold text-gray-900 leading-[1.12] mb-8"
           >
-            Illuminating Health through <br className="hidden lg:block" /><span style={{ background: "linear-gradient(105deg, #C9A048 10%, #f5e48a 55%, #C9A048 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Science-Driven Formulations</span>
+            Dhinakar Pharma: <br className="hidden lg:block" />Illuminating Health through <br className="hidden lg:block" /><span style={{ background: "linear-gradient(105deg, #C9A048 10%, #f5e48a 55%, #C9A048 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Science-Driven Formulations</span>
           </motion.h1>
 
           <motion.p
