@@ -11,6 +11,7 @@ const navLinks = [
   { name: "Our Values", href: "/values" },
   { name: "Products", href: "/products" },
   { name: "From the Manufacturers", href: "/from-the-manufacturers" },
+  { name: "Connect", href: "/connect" },
 ];
 
 import { useCartStore } from "@/store/cartStore";

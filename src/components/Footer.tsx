@@ -11,6 +11,7 @@ const navLinks = [
   { name: "Products", href: "/products" },
   { name: "Track Order", href: "/track" },
   { name: "From the Manufacturers", href: "/from-the-manufacturers" },
+  { name: "Connect", href: "/connect" },
 ];
 
 export default function Footer() {
@@ -40,48 +41,34 @@ export default function Footer() {
     );
   }
   return (
-    <footer className="relative overflow-hidden text-white pt-16 pb-8 bg-[#0c2160]">
-      {/* Deep Atmospheric Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-brand-blue/20 blur-[120px] pointer-events-none" />
+    <footer className="relative overflow-hidden text-slate-800 pt-10 pb-6 bg-[#cbdcf7]">
+      {/* Smooth Atmospheric Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-white/40 blur-[80px] pointer-events-none" />
       
       <div className="relative z-10 max-w-6xl mx-auto px-6 flex flex-col items-center">
         
-        {/* ── 1. THE BRAND MARK (PRECISION MULTI-ZONE MASK) ── */}
-        <div className="mb-8 relative group">
-          <div className="absolute inset-0 bg-[#C9A048]/15 blur-[60px] rounded-full scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-          <div className="relative w-48 h-24 md:w-64 md:h-44 flex items-center justify-center transition-transform duration-700 hover:scale-105">
-            {/* 
-               Logo as a Mask with Surgical Multi-Stop Gradient:
-               - White targets the structural Blue parts (D and DHINAKAR)
-               - Gold targets the original Yellow/Gold parts (Swoosh, Leaf, PHARMA)
-            */}
-            <div 
-              className="w-full h-full drop-shadow-[0_0_12px_rgba(255,255,255,0.2)]"
-              style={{
-                background: "linear-gradient(to bottom, white 0%, white 42%, #C9A048 43%, #C9A048 63%, white 64%, white 85%, #C9A048 86%, #C9A048 100%)",
-                WebkitMaskImage: 'url(/logo.png)',
-                WebkitMaskRepeat: 'no-repeat',
-                WebkitMaskPosition: 'center',
-                WebkitMaskSize: 'contain',
-                maskImage: 'url(/logo.png)',
-                maskRepeat: 'no-repeat',
-                maskPosition: 'center',
-                maskSize: 'contain',
-              }}
+        {/* ── 1. THE BRAND MARK (BALANCED SIZE) ── */}
+        <div className="mb-6 relative group">
+          <div className="absolute inset-0 bg-brand-blue/10 blur-[60px] rounded-full scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          <div className="relative w-48 h-24 md:w-56 md:h-28 flex items-center justify-center transition-transform duration-700 hover:scale-105">
+            <img
+              src="/logo.png"
+              alt="Dhinakar Pharma"
+              className="w-full h-full object-contain contrast-[1.1] mix-blend-multiply"
             />
           </div>
         </div>
 
         {/* ── 2. THE STATEMENT (PREMIUM TYPOGRAPHY) ── */}
-        <div className="max-w-2xl text-center mb-10">
-           <h2 className="text-base md:text-xl font-serif font-bold text-white leading-snug tracking-tight mb-3">
+        <div className="max-w-2xl text-center mb-8">
+           <h2 className="text-base md:text-xl font-serif font-bold text-slate-900 leading-snug tracking-tight mb-3">
              Addressing complex metabolic and reproductive disorders with <br className="hidden md:block" />
-             <span className="text-[#C9A048] italic font-medium">precision-crafted generic solutions</span>.
+             <span className="text-brand-blue italic font-medium">precision-crafted generic solutions</span>.
            </h2>
-           <div className="flex items-center justify-center gap-1.5 opacity-30">
-              <div className="w-1 h-1 rounded-full bg-[#C9A048]" />
-              <div className="w-6 h-px bg-white" />
-              <div className="w-1 h-1 rounded-full bg-[#C9A048]" />
+           <div className="flex items-center justify-center gap-1.5 opacity-20">
+              <div className="w-1 h-1 rounded-full bg-brand-blue" />
+              <div className="w-6 h-px bg-slate-400" />
+              <div className="w-1 h-1 rounded-full bg-brand-blue" />
            </div>
         </div>
 
@@ -91,7 +78,7 @@ export default function Footer() {
             <Link
               key={link.name}
               href={link.href}
-              className="text-white/60 hover:text-white text-[10px] font-black tracking-[0.3em] uppercase transition-all duration-300 relative group"
+              className="text-slate-600 hover:text-brand-blue text-[10px] font-black tracking-[0.3em] uppercase transition-all duration-300 relative group"
             >
               <span className="relative z-10">{link.name}</span>
               <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#C9A048] group-hover:w-full transition-all duration-500" />
@@ -100,14 +87,14 @@ export default function Footer() {
         </nav>
 
         {/* ── 4. THE UTILITY BAR ── */}
-        <div className="w-full pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-[9px] font-bold tracking-[0.15em] uppercase text-white/40">
+        <div className="w-full pt-6 border-t border-slate-300/40 flex flex-col md:flex-row items-center justify-between gap-4 text-[9px] font-bold tracking-[0.15em] uppercase text-slate-500">
           <p>© {new Date().getFullYear()} Dhinakar Pharma Private Limited.</p>
           
-          <div className="flex flex-wrap justify-center gap-6 text-white/60">
-            <Link href="/track" className="hover:text-white transition-colors">Track Order</Link>
-            <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
-            <Link href="#" className="hover:text-white transition-colors">Terms</Link>
-            <Link href="#" className="hover:text-white transition-colors">Sitemap</Link>
+          <div className="flex flex-wrap justify-center gap-6 text-slate-600">
+            <Link href="/track" className="hover:text-brand-blue transition-colors">Track Order</Link>
+            <Link href="#" className="hover:text-brand-blue transition-colors">Privacy</Link>
+            <Link href="#" className="hover:text-brand-blue transition-colors">Terms</Link>
+            <Link href="#" className="hover:text-brand-blue transition-colors">Sitemap</Link>
           </div>
         </div>
 
