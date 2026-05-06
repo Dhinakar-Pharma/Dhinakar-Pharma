@@ -8,7 +8,7 @@ import Link from "next/link";
 // Array of images for the right-side carousel
 const heroImages = [
   "/lab_hero.png",
-  "/corporate_hero.png",
+  "/scientific_hero.png",
   "/pharma_hero.png"
 ];
 

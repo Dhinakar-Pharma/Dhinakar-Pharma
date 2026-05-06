@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { MapPin, Mail, Phone } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -38,84 +39,75 @@ export default function Footer() {
       </footer>
     );
   }
-
   return (
-    <footer
-      className="relative overflow-hidden text-white pt-12 pb-8"
-      style={{ background: "linear-gradient(150deg, #0c2160 0%, #1B3F8B 60%, #2460aa 100%)" }}
-    >
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "22px 22px" }} />
-      <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full border border-white/[0.04]" />
-
-      <div className="relative z-10 max-w-4xl mx-auto px-6 flex flex-col items-center text-center">
-
-        {/* 1. Logo Section */}
-        <div className="mb-6 relative group">
-          <div className="absolute inset-0 bg-white/20 blur-2xl rounded-full scale-110 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-          <div className="relative w-24 h-24 md:w-28 md:h-28 bg-white/10 backdrop-blur-md rounded-full border border-white/20 p-4 flex items-center justify-center shadow-2xl transition-transform duration-500 hover:scale-105">
-            <img
-              src="/logo.png"
-              alt="Dhinakar Pharma"
-              className="w-full h-full object-contain mix-blend-multiply contrast-[1.1] scale-[1.5]"
+    <footer className="relative overflow-hidden text-white pt-16 pb-8 bg-[#0c2160]">
+      {/* Deep Atmospheric Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-brand-blue/20 blur-[120px] pointer-events-none" />
+      
+      <div className="relative z-10 max-w-6xl mx-auto px-6 flex flex-col items-center">
+        
+        {/* ── 1. THE BRAND MARK (PRECISION MULTI-ZONE MASK) ── */}
+        <div className="mb-8 relative group">
+          <div className="absolute inset-0 bg-[#C9A048]/15 blur-[60px] rounded-full scale-150 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          <div className="relative w-48 h-24 md:w-64 md:h-44 flex items-center justify-center transition-transform duration-700 hover:scale-105">
+            {/* 
+               Logo as a Mask with Surgical Multi-Stop Gradient:
+               - White targets the structural Blue parts (D and DHINAKAR)
+               - Gold targets the original Yellow/Gold parts (Swoosh, Leaf, PHARMA)
+            */}
+            <div 
+              className="w-full h-full drop-shadow-[0_0_12px_rgba(255,255,255,0.2)]"
+              style={{
+                background: "linear-gradient(to bottom, white 0%, white 42%, #C9A048 43%, #C9A048 63%, white 64%, white 85%, #C9A048 86%, #C9A048 100%)",
+                WebkitMaskImage: 'url(/logo.png)',
+                WebkitMaskRepeat: 'no-repeat',
+                WebkitMaskPosition: 'center',
+                WebkitMaskSize: 'contain',
+                maskImage: 'url(/logo.png)',
+                maskRepeat: 'no-repeat',
+                maskPosition: 'center',
+                maskSize: 'contain',
+              }}
             />
           </div>
         </div>
 
-        {/* 2. Tagline */}
-        <p className="text-white/70 text-sm leading-relaxed max-w-lg mb-6">
-          Addressing complex metabolic and reproductive disorders with <br className="hidden sm:block" />
-          precision-crafted generic solutions from Hyderabad, India.
-        </p>
+        {/* ── 2. THE STATEMENT (PREMIUM TYPOGRAPHY) ── */}
+        <div className="max-w-2xl text-center mb-10">
+           <h2 className="text-base md:text-xl font-serif font-bold text-white leading-snug tracking-tight mb-3">
+             Addressing complex metabolic and reproductive disorders with <br className="hidden md:block" />
+             <span className="text-[#C9A048] italic font-medium">precision-crafted generic solutions</span>.
+           </h2>
+           <div className="flex items-center justify-center gap-1.5 opacity-30">
+              <div className="w-1 h-1 rounded-full bg-[#C9A048]" />
+              <div className="w-6 h-px bg-white" />
+              <div className="w-1 h-1 rounded-full bg-[#C9A048]" />
+           </div>
+        </div>
 
-        {/* 3. Navigation Links */}
-        <nav className="flex flex-wrap justify-center gap-x-8 gap-y-3 mb-6">
+        {/* ── 3. THE TABS (SCIENTIFIC NAVIGATION) ── */}
+        <nav className="flex flex-wrap justify-center gap-x-10 gap-y-3 mb-12">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
-              className="text-white/80 hover:text-white text-[11px] font-bold tracking-[0.2em] uppercase transition-colors duration-200"
+              className="text-white/60 hover:text-white text-[10px] font-black tracking-[0.3em] uppercase transition-all duration-300 relative group"
             >
-              {link.name}
+              <span className="relative z-10">{link.name}</span>
+              <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[#C9A048] group-hover:w-full transition-all duration-500" />
             </Link>
           ))}
         </nav>
 
-        {/* 5. Horizontal Divider */}
-        <div className="w-full h-px bg-white/10 mb-6" />
-
-        {/* 6. Contact Row */}
-        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-white/60 text-[12px] mb-10">
-          <div className="flex items-start gap-2.5 max-w-[280px]">
-            <MapPin className="w-4 h-4 text-blue-300 opacity-50 shrink-0 mt-0.5" />
-            <span className="text-left leading-relaxed">
-              Plot no 556,
-              <br /> Sri Govinda Nilayam,
-              <br /> OU colony, Shaikpet,
-              <br /> Hyderabad - 500008
-            </span>
-          </div>
-          <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-white/10" />
-          <div className="flex items-center gap-2.5">
-            <Phone className="w-4 h-4 text-blue-300 opacity-50" />
-            <span>+91-9949855889</span>
-          </div>
-          <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-white/10" />
-          <div className="flex items-center gap-2.5">
-            <Mail className="w-4 h-4 text-blue-300 opacity-50" />
-            <span>business@dhinakarpharma.in</span>
-          </div>
-        </div>
-
-        {/* 7. Bottom Bar */}
-        <div className="w-full border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-white/30 text-[10px]">
-          <p>© {new Date().getFullYear()} Dhinakar Pharma. All rights reserved.</p>
-          <div className="flex items-center gap-8">
-            <Link href="/track" className="hover:text-white/50 transition-colors">Track Your Order</Link>
-            <Link href="#" className="hover:text-white/50 transition-colors">Privacy Policy</Link>
-            <Link href="#" className="hover:text-white/50 transition-colors">Terms of Service</Link>
-            <Link href="#" className="hover:text-white/50 transition-colors">Site Map</Link>
+        {/* ── 4. THE UTILITY BAR ── */}
+        <div className="w-full pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-[9px] font-bold tracking-[0.15em] uppercase text-white/40">
+          <p>© {new Date().getFullYear()} Dhinakar Pharma Private Limited.</p>
+          
+          <div className="flex flex-wrap justify-center gap-6 text-white/60">
+            <Link href="/track" className="hover:text-white transition-colors">Track Order</Link>
+            <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
+            <Link href="#" className="hover:text-white transition-colors">Terms</Link>
+            <Link href="#" className="hover:text-white transition-colors">Sitemap</Link>
           </div>
         </div>
 
