@@ -107,22 +107,22 @@ export default function FromManufacturers() {
                ))}
             </div>
 
-            {/* Edge Gradients for seamless infinite feel */}
-            <div className="absolute left-0 top-0 bottom-0 w-64 bg-gradient-to-r from-[#F8FAFC] via-[#F8FAFC]/80 to-transparent z-20 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-64 bg-gradient-to-l from-[#F8FAFC] via-[#F8FAFC]/80 to-transparent z-20 pointer-events-none" />
+            {/* Edge Gradients for seamless infinite feel (Desktop only) */}
+            <div className="hidden lg:block absolute left-0 top-0 bottom-0 w-64 bg-gradient-to-r from-[#F8FAFC] via-[#F8FAFC]/80 to-transparent z-20 pointer-events-none" />
+            <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-64 bg-gradient-to-l from-[#F8FAFC] via-[#F8FAFC]/80 to-transparent z-20 pointer-events-none" />
 
-            <div className="flex w-fit animate-marquee hover:[animation-play-state:paused] gap-16 py-12 px-16">
+            <div className="flex flex-wrap lg:flex-nowrap justify-center lg:justify-start lg:w-fit lg:animate-marquee hover:[animation-play-state:paused] gap-4 sm:gap-8 lg:gap-16 py-8 lg:py-12 px-2 sm:px-6 lg:px-16">
                {[...Array(2)].map((_, idx) => (
-                  <div key={idx} className="flex gap-16">
+                  <div key={idx} className={`flex flex-wrap lg:flex-nowrap justify-center lg:justify-start gap-4 sm:gap-8 lg:gap-16 ${idx === 1 ? 'hidden lg:flex' : ''}`}>
                     {[
-                      { title: "WHO-GMP", color: "#1B3F8B", image: "/certifications/who-gmp.png", pad: "p-6 sm:p-8", filter: "" },
-                      { title: "USFDA", color: "#0c2160", image: "/certifications/usfda.svg", pad: "p-10 sm:p-12", filter: "" },
-                      { title: "ISO 9001", color: "#C9A048", image: "/certifications/iso.png", pad: "p-4 sm:p-6", filter: "" },
-                      { title: "HACCP", color: "#386641", image: "/certifications/haccp.png", pad: "p-2 sm:p-4", filter: "" },
-                      { title: "FSSAI", color: "#006d77", image: "/certifications/fssai.png", pad: "p-2 sm:p-4", filter: "contrast-125 brightness-105" },
-                      { title: "HALAL", color: "#457b9d", image: "/certifications/halal.png", pad: "p-4 sm:p-6", filter: "" },
-                      { title: "Ayush", color: "#6a994e", image: "/certifications/ayush.png", pad: "p-1 sm:p-2", filter: "contrast-125 brightness-105" },
-                      { title: "ISO 22000", color: "#4361ee", image: "/certifications/iso22000.png", pad: "p-4 sm:p-6", filter: "" }
+                      { title: "WHO-GMP", color: "#1B3F8B", image: "/certifications/who-gmp.png", pad: "p-4 sm:p-6 lg:p-8", filter: "" },
+                      { title: "USFDA", color: "#0c2160", image: "/certifications/usfda.svg", pad: "p-6 sm:p-8 lg:p-12", filter: "" },
+                      { title: "ISO 9001", color: "#C9A048", image: "/certifications/iso.png", pad: "p-3 sm:p-4 lg:p-6", filter: "" },
+                      { title: "HACCP", color: "#386641", image: "/certifications/haccp.png", pad: "p-2 sm:p-3 lg:p-4", filter: "" },
+                      { title: "FSSAI", color: "#006d77", image: "/certifications/fssai.png", pad: "p-2 sm:p-3 lg:p-4", filter: "contrast-125 brightness-105" },
+                      { title: "HALAL", color: "#457b9d", image: "/certifications/halal.png", pad: "p-3 sm:p-4 lg:p-6", filter: "" },
+                      { title: "Ayush", color: "#6a994e", image: "/certifications/ayush.png", pad: "p-1 sm:p-2 lg:p-2", filter: "contrast-125 brightness-105" },
+                      { title: "ISO 22000", color: "#4361ee", image: "/certifications/iso22000.png", pad: "p-3 sm:p-4 lg:p-6", filter: "" }
                     ].map((doc, i) => (
                       <motion.div 
                         key={`${idx}-${i}`}
@@ -138,7 +138,7 @@ export default function FromManufacturers() {
                         className="relative"
                       >
                          <motion.div 
-                           className={`w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-white/90 backdrop-blur-2xl border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.03)] flex flex-col items-center justify-center group cursor-pointer transition-all duration-700 relative overflow-hidden ${doc.pad}`}
+                           className={`w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 xl:w-56 xl:h-56 rounded-full bg-white/90 backdrop-blur-2xl border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.03)] flex flex-col items-center justify-center group cursor-pointer transition-all duration-700 relative overflow-hidden ${doc.pad}`}
                            whileHover={{ scale: 1.08, boxShadow: "0 30px 80px rgba(0,0,0,0.12)" }}
                          >
                             {/* Iridescent Gradient Border (Animated on Hover) */}
