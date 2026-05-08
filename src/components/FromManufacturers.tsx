@@ -56,8 +56,8 @@ export default function FromManufacturers() {
       <section className="pt-24 pb-8 bg-[#F8FAFC] border-t border-slate-100 relative overflow-hidden">
          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-blue/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
          
-         <div className="max-w-[1400px] mx-auto px-6 lg:px-12 mb-16 relative z-10">
-            <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8">
+         <div className="w-full px-6 lg:px-12 xl:px-24 mb-16 relative z-10">
+            <div className="flex flex-col items-start gap-8">
                <div className="text-left flex-grow">
                   <div className="flex items-center gap-3 mb-4">
                      <div className="h-px w-6 bg-brand-blue/20" />
@@ -77,14 +77,21 @@ export default function FromManufacturers() {
          <div className="relative py-4 overflow-hidden bg-[#F8FAFC]">
             {/* Molecular Background Elements */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.4]">
-               {[...Array(6)].map((_, i) => (
+               {[
+                 { left: "12%", top: "24%" },
+                 { left: "68%", top: "15%" },
+                 { left: "35%", top: "72%" },
+                 { left: "85%", top: "58%" },
+                 { left: "45%", top: "33%" },
+                 { left: "18%", top: "85%" }
+               ].map((pos, i) => (
                   <motion.div
                      key={i}
                      className="absolute w-64 h-64 rounded-full blur-[100px]"
                      style={{ 
                         backgroundColor: i % 2 === 0 ? '#1B3F8B08' : '#C9A04808',
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`
+                        left: pos.left,
+                        top: pos.top
                      }}
                      animate={{ 
                         x: [0, 50, 0],
@@ -108,14 +115,14 @@ export default function FromManufacturers() {
                {[...Array(2)].map((_, idx) => (
                   <div key={idx} className="flex gap-16">
                     {[
-                      { title: "WHO-GMP", type: "Certification", id: "01", color: "#1B3F8B", icon: <ShieldCheck className="w-7 h-7" /> },
-                      { title: "USFDA", type: "Regulatory", id: "02", color: "#0c2160", icon: <ShieldCheck className="w-7 h-7" /> },
-                      { title: "ISO 9001", type: "Quality", id: "03", color: "#C9A048", icon: <Award className="w-7 h-7" /> },
-                      { title: "HACCP", type: "Safety", id: "04", color: "#386641", icon: <ShieldCheck className="w-7 h-7" /> },
-                      { title: "FSSAI", type: "Compliance", id: "05", color: "#006d77", icon: <ShieldCheck className="w-7 h-7" /> },
-                      { title: "HALAL", type: "Institutional", id: "06", color: "#457b9d", icon: <ShieldCheck className="w-7 h-7" /> },
-                      { title: "Ayush", type: "Scientific", id: "07", color: "#6a994e", icon: <Beaker className="w-7 h-7" /> },
-                      { title: "ISO 22000", type: "Certification", id: "08", color: "#4361ee", icon: <ShieldCheck className="w-7 h-7" /> }
+                      { title: "WHO-GMP", color: "#1B3F8B", image: "/certifications/who-gmp.png", pad: "p-6 sm:p-8", filter: "" },
+                      { title: "USFDA", color: "#0c2160", image: "/certifications/usfda.svg", pad: "p-10 sm:p-12", filter: "" },
+                      { title: "ISO 9001", color: "#C9A048", image: "/certifications/iso.png", pad: "p-4 sm:p-6", filter: "" },
+                      { title: "HACCP", color: "#386641", image: "/certifications/haccp.png", pad: "p-2 sm:p-4", filter: "" },
+                      { title: "FSSAI", color: "#006d77", image: "/certifications/fssai.png", pad: "p-2 sm:p-4", filter: "contrast-125 brightness-105" },
+                      { title: "HALAL", color: "#457b9d", image: "/certifications/halal.png", pad: "p-4 sm:p-6", filter: "" },
+                      { title: "Ayush", color: "#6a994e", image: "/certifications/ayush.png", pad: "p-1 sm:p-2", filter: "contrast-125 brightness-105" },
+                      { title: "ISO 22000", color: "#4361ee", image: "/certifications/iso22000.png", pad: "p-4 sm:p-6", filter: "" }
                     ].map((doc, i) => (
                       <motion.div 
                         key={`${idx}-${i}`}
@@ -131,7 +138,7 @@ export default function FromManufacturers() {
                         className="relative"
                       >
                          <motion.div 
-                           className="w-56 h-56 sm:w-64 sm:h-64 rounded-full bg-white/90 backdrop-blur-2xl border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.03)] flex flex-col items-center justify-center p-8 sm:p-10 group cursor-pointer transition-all duration-700 relative overflow-hidden"
+                           className={`w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-white/90 backdrop-blur-2xl border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.03)] flex flex-col items-center justify-center group cursor-pointer transition-all duration-700 relative overflow-hidden ${doc.pad}`}
                            whileHover={{ scale: 1.08, boxShadow: "0 30px 80px rgba(0,0,0,0.12)" }}
                          >
                             {/* Iridescent Gradient Border (Animated on Hover) */}
@@ -143,7 +150,7 @@ export default function FromManufacturers() {
                             </div>
 
                             {/* Shimmer Effect */}
-                            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+                            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none z-20" />
 
                             {/* Accent Glow */}
                             <div 
@@ -151,31 +158,14 @@ export default function FromManufacturers() {
                                style={{ backgroundColor: doc.color }}
                             />
 
-                            <div 
-                               className="w-16 h-16 sm:w-20 sm:h-20 rounded-[2rem] flex items-center justify-center mb-8 shadow-[0_8px_20px_rgba(0,0,0,0.03)] transition-all duration-700 group-hover:rounded-2xl group-hover:shadow-lg group-hover:-rotate-6"
-                               style={{ backgroundColor: `${doc.color}10`, color: doc.color }}
-                            >
-                               {doc.icon}
-                            </div>
-
-                            <div className="text-center relative z-10">
-                               <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.5em] mb-3 opacity-40 group-hover:opacity-100 transition-opacity" style={{ color: doc.color }}>{doc.type}</p>
-                               <h3 className="text-base sm:text-xl font-serif font-bold text-slate-900 leading-tight tracking-tight">
-                                  {doc.title}
-                               </h3>
-                            </div>
-
-                            {/* Scientific Detail Dots */}
-                            <div className="mt-8 flex gap-1.5 opacity-20 group-hover:opacity-60 transition-opacity">
-                               {[1, 2, 3, 4, 5].map(dot => (
-                                  <div key={dot} className="w-1 h-1 rounded-full bg-slate-300" />
-                               ))}
-                            </div>
-
-                            {/* Reference Tag */}
-                            <div className="absolute top-10 right-10">
-                               <span className="text-[8px] font-black text-slate-100 uppercase tracking-widest group-hover:text-slate-300 transition-colors">ID-{doc.id}</span>
-                            </div>
+                            <img 
+                               src={doc.image} 
+                               alt={`${doc.title} Logo`} 
+                               className={`w-full h-full object-contain mix-blend-multiply relative z-10 transition-transform duration-700 group-hover:scale-110 ${doc.filter}`}
+                               onError={(e) => {
+                                 (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${doc.title}&background=${doc.color.replace('#', '')}&color=fff&font-size=0.33`;
+                               }}
+                            />
                          </motion.div>
                       </motion.div>
                     ))}
