@@ -111,18 +111,19 @@ export default function FromManufacturers() {
             <div className="hidden lg:block absolute left-0 top-0 bottom-0 w-64 bg-gradient-to-r from-[#F8FAFC] via-[#F8FAFC]/80 to-transparent z-20 pointer-events-none" />
             <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-64 bg-gradient-to-l from-[#F8FAFC] via-[#F8FAFC]/80 to-transparent z-20 pointer-events-none" />
 
-            <div className="flex flex-wrap lg:flex-nowrap justify-center lg:justify-start lg:w-fit lg:animate-marquee hover:[animation-play-state:paused] gap-4 sm:gap-8 lg:gap-16 py-8 lg:py-12 px-2 sm:px-6 lg:px-16">
+            <div className="flex flex-wrap lg:flex-nowrap justify-center lg:justify-start lg:w-fit desktop-marquee hover:[animation-play-state:paused] gap-x-8 gap-y-16 sm:gap-x-12 sm:gap-y-20 lg:gap-16 py-8 lg:py-12 px-2 sm:px-6 lg:px-16">
                {[...Array(2)].map((_, idx) => (
-                  <div key={idx} className={`flex flex-wrap lg:flex-nowrap justify-center lg:justify-start gap-4 sm:gap-8 lg:gap-16 ${idx === 1 ? 'hidden lg:flex' : ''}`}>
+                  <div key={idx} className={`flex flex-wrap lg:flex-nowrap justify-center lg:justify-start gap-x-8 gap-y-16 sm:gap-x-12 sm:gap-y-20 lg:gap-16 ${idx === 1 ? 'hidden lg:flex' : ''}`}>
                     {[
                       { title: "WHO-GMP", color: "#1B3F8B", image: "/certifications/who-gmp.png", pad: "p-4 sm:p-6 lg:p-8", filter: "" },
-                      { title: "USFDA", color: "#0c2160", image: "/certifications/usfda.svg", pad: "p-6 sm:p-8 lg:p-12", filter: "" },
+                      { title: "USFDA", color: "#0c2160", image: "/certifications/fda-eagle.png", pad: "p-1 lg:p-2", filter: "", objectFit: "object-contain", mixBlend: "mix-blend-normal", customText: "U.S. FDA Registration No.: 19866793808" },
                       { title: "ISO 9001", color: "#C9A048", image: "/certifications/iso.png", pad: "p-3 sm:p-4 lg:p-6", filter: "" },
                       { title: "HACCP", color: "#386641", image: "/certifications/haccp.png", pad: "p-2 sm:p-3 lg:p-4", filter: "" },
                       { title: "FSSAI", color: "#006d77", image: "/certifications/fssai.png", pad: "p-2 sm:p-3 lg:p-4", filter: "contrast-125 brightness-105" },
                       { title: "HALAL", color: "#457b9d", image: "/certifications/halal.png", pad: "p-3 sm:p-4 lg:p-6", filter: "" },
                       { title: "Ayush", color: "#6a994e", image: "/certifications/ayush.png", pad: "p-1 sm:p-2 lg:p-2", filter: "contrast-125 brightness-105" },
-                      { title: "ISO 22000", color: "#4361ee", image: "/certifications/iso22000.png", pad: "p-3 sm:p-4 lg:p-6", filter: "" }
+                      { title: "ISO 22000", color: "#4361ee", image: "/certifications/iso22000.png", pad: "p-3 sm:p-4 lg:p-6", filter: "" },
+                      { title: "Made in India", color: "#FF9933", image: "/certifications/india.png", pad: "p-2 sm:p-4 lg:p-6", filter: "", objectFit: "object-contain", mixBlend: "mix-blend-normal", customText: "Made in India" }
                     ].map((doc, i) => (
                       <motion.div 
                         key={`${idx}-${i}`}
@@ -135,7 +136,7 @@ export default function FromManufacturers() {
                            repeat: Infinity, 
                            ease: "easeInOut" 
                         }}
-                        className="relative"
+                        className="relative flex flex-col items-center mb-8 sm:mb-10 lg:mb-0"
                       >
                          <motion.div 
                            className={`w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 xl:w-56 xl:h-56 rounded-full bg-white/90 backdrop-blur-2xl border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.03)] flex flex-col items-center justify-center group cursor-pointer transition-all duration-700 relative overflow-hidden ${doc.pad}`}
@@ -161,12 +162,20 @@ export default function FromManufacturers() {
                             <img 
                                src={doc.image} 
                                alt={`${doc.title} Logo`} 
-                               className={`w-full h-full object-contain mix-blend-multiply relative z-10 transition-transform duration-700 group-hover:scale-110 ${doc.filter}`}
+                               className={`w-full h-full ${doc.objectFit || 'object-contain'} ${doc.mixBlend || 'mix-blend-multiply'} relative z-10 transition-transform duration-700 group-hover:scale-110 ${doc.filter}`}
                                onError={(e) => {
                                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${doc.title}&background=${doc.color.replace('#', '')}&color=fff&font-size=0.33`;
                                }}
                             />
                          </motion.div>
+
+                         {doc.customText && (
+                            <div className="absolute -bottom-6 sm:-bottom-8 z-30 w-[140%] sm:w-max max-w-[150%] sm:max-w-[140%] bg-white backdrop-blur-xl py-2 px-2 sm:px-5 rounded-xl sm:rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.12)] border border-slate-100 transition-transform duration-700 group-hover:-translate-y-2 flex items-center justify-center">
+                               <p className="text-[9px] sm:text-[9px] lg:text-[11px] font-extrabold text-[#0c2160] text-center uppercase tracking-wider leading-tight">
+                                  {doc.customText}
+                               </p>
+                            </div>
+                         )}
                       </motion.div>
                     ))}
                   </div>
@@ -179,8 +188,10 @@ export default function FromManufacturers() {
                0% { transform: translateX(0); }
                100% { transform: translateX(-50%); }
             }
-            .animate-marquee {
-               animation: marquee 60s linear infinite;
+            @media (min-width: 1024px) {
+               .desktop-marquee {
+                  animation: marquee 60s linear infinite;
+               }
             }
          `}</style>
       </section>
