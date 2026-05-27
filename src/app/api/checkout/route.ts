@@ -106,6 +106,7 @@ export async function POST(req: Request) {
       orderId: rzpOrder.id,
       amount: options.amount,
       currency: "INR",
+      keyId: (process.env.RAZORPAY_KEY_ID as string)?.trim(),
     });
 
   } catch (error: any) {

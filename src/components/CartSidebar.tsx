@@ -52,7 +52,7 @@ export default function CartSidebar() {
       if (!res.ok) throw new Error(data.error);
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, 
+        key: data.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, 
         amount: data.amount,
         currency: "INR",
         name: "Dhinakar Pharma",
