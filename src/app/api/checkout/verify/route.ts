@@ -40,7 +40,18 @@ export async function POST(req: Request) {
         }
       });
 
-      // 3. Send Email Receipt automatically
+      // 3. Increment Coupon Uses (if any)
+      if (order.promoCode) {
+        const coupon = await prisma.coupon.findUnique({ where: { code: order.promoCode } });
+        if (coupon) {
+          await prisma.coupon.update({
+            where: { id: coupon.id },
+            data: { uses: coupon.uses + 1 }
+          });
+        }
+      }
+
+      // 4. Send Email Receipt automatically
       await sendOrderReceiptEmail(order);
 
       return NextResponse.json({ success: true });

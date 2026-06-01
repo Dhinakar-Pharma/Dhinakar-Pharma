@@ -16,7 +16,7 @@ const navLinks = [
 
 export default function Footer() {
   const pathname = usePathname();
-  if (pathname?.startsWith('/admin/print')) return null;
+  if (pathname?.startsWith('/admin/print') || pathname?.startsWith('/admin/login')) return null;
 
   const isAdmin = pathname?.startsWith('/admin');
 

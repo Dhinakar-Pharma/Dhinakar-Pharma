@@ -18,6 +18,7 @@ export default function CartSidebar() {
   const [promoCode, setPromoCode] = useState("");
   const [appliedPromo, setAppliedPromo] = useState<{code: string, discountAmount: number} | null>(null);
   const [promoError, setPromoError] = useState("");
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
 
   const subtotal = getTotalPrice();
   const discountAmount = appliedPromo ? appliedPromo.discountAmount : 0;
@@ -58,6 +59,11 @@ export default function CartSidebar() {
         name: "Dhinakar Pharma",
         description: `Order for ${items.length} product(s)`,
         order_id: data.orderId, 
+        config: {
+          display: {
+            hide: [{ method: 'emi' }, { method: 'paylater' }]
+          }
+        },
         handler: async function (response: any) {
           const verifyRes = await fetch("/api/checkout/verify", {
             method: "POST",
@@ -75,8 +81,12 @@ export default function CartSidebar() {
             setCheckoutResult({ status: "success", orderId: data.dbOrderId, timestamp: now });
             setShowCheckout(false);
             clearCart();
+            setAppliedPromo(null);
+            setPromoCode("");
           } else {
             setCheckoutResult({ status: "failed", error: verifyData.error || "Signature mismatch" });
+            setAppliedPromo(null);
+            setPromoCode("");
           }
         },
         prefill: { name: formData.name, email: formData.email, contact: formData.phone },
@@ -86,12 +96,16 @@ export default function CartSidebar() {
       const rzp1 = new (window as any).Razorpay(options);
       rzp1.on('payment.failed', function (response: any) {
         setCheckoutResult({ status: "failed", error: response.error.description });
+        setAppliedPromo(null);
+        setPromoCode("");
       });
       rzp1.open();
 
     } catch (error: any) {
       console.error(error);
       setCheckoutResult({ status: "failed", error: error.message || "Something went wrong" });
+      setAppliedPromo(null);
+      setPromoCode("");
     } finally {
       setIsProcessing(false);
     }
@@ -225,21 +239,32 @@ export default function CartSidebar() {
                     </button>
                   ) : (
                     <button 
-                      onClick={() => {
+                      disabled={isValidatingPromo}
+                      onClick={async () => {
+                        if (!promoCode.trim()) return;
                         setPromoError("");
-                        if (promoCode === "WELCOME20") {
-                          setAppliedPromo({ code: "WELCOME20", discountAmount: subtotal * 0.20 });
-                        } else if (promoCode === "DHINAKAR15") {
-                          setAppliedPromo({ code: "DHINAKAR15", discountAmount: subtotal * 0.15 });
-                        } else if (promoCode === "FLAT500") {
-                          setAppliedPromo({ code: "FLAT500", discountAmount: 500 });
-                        } else {
-                          setPromoError("Invalid or expired promo code.");
+                        setIsValidatingPromo(true);
+                        try {
+                          const res = await fetch("/api/coupons/validate", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ code: promoCode })
+                          });
+                          const data = await res.json();
+                          if (res.ok && data.success) {
+                            setAppliedPromo({ code: data.code, discountAmount: subtotal * (data.discountPercentage / 100) });
+                          } else {
+                            setPromoError(data.error || "Invalid promo code.");
+                          }
+                        } catch (err) {
+                          setPromoError("Failed to validate code.");
+                        } finally {
+                          setIsValidatingPromo(false);
                         }
                       }}
-                      className="px-5 py-2.5 bg-slate-900 text-white rounded-lg font-bold text-xs hover:bg-brand-blue transition-colors shadow-sm"
+                      className="px-5 py-2.5 bg-slate-900 text-white rounded-lg font-bold text-xs hover:bg-brand-blue transition-colors shadow-sm disabled:opacity-50"
                     >
-                      Apply
+                      {isValidatingPromo ? "..." : "Apply"}
                     </button>
                   )}
                 </div>

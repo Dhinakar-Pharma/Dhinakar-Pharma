@@ -44,17 +44,21 @@ export async function POST(req: Request) {
 
     // Apply Promo Code Logic securely on backend
     let discountAmount = 0;
-    if (promoCode === "WELCOME20") {
-      discountAmount = totalAmount * 0.20;
-    } else if (promoCode === "DHINAKAR15") {
-      discountAmount = totalAmount * 0.15;
-    } else if (promoCode === "FLAT500") {
-      discountAmount = 500;
+    let validPromoCode: string | null = null;
+    if (promoCode) {
+      const formattedCode = promoCode.toUpperCase().trim();
+      const coupon = await prisma.coupon.findUnique({
+        where: { code: formattedCode }
+      });
+      if (coupon && coupon.isActive && coupon.uses < coupon.maxUses) {
+        discountAmount = totalAmount * (coupon.discountPercentage / 100);
+        validPromoCode = coupon.code;
+      }
     }
-    
+
     // Ensure discount doesn't exceed total amount
     if (discountAmount > totalAmount) discountAmount = totalAmount;
-    
+
     totalAmount = totalAmount - discountAmount;
 
     // 1. Create DB Order first with the nested items
@@ -66,6 +70,7 @@ export async function POST(req: Request) {
         shippingAddress,
         prescribingDoctor: prescribingDoctor || null,
         totalAmount,
+        promoCode: validPromoCode,
         paymentStatus: "PENDING",
         fulfillmentStatus: "PROCESSING",
         items: {

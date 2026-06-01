@@ -48,7 +48,7 @@ export default function Navbar() {
   const isAdmin = pathname.startsWith('/admin');
   const isLogin = pathname.includes('/login');
 
-  if (pathname.startsWith('/admin/print')) return null;
+  if (pathname.startsWith('/admin/print') || isLogin) return null;
 
   return (
     <>
@@ -128,14 +128,16 @@ export default function Navbar() {
               )}
 
               {/* Mobile menu toggle */}
-              <div className="md:hidden flex items-center">
-                <button
-                  onClick={() => setIsOpen(!isOpen)}
-                  className="p-2 rounded-xl text-gray-500 hover:bg-gray-50 transition-colors"
-                >
-                  {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-                </button>
-              </div>
+              {!isAdmin && (
+                <div className="md:hidden flex items-center">
+                  <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="p-2 rounded-xl text-gray-500 hover:bg-gray-50 transition-colors"
+                  >
+                    {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Package, CheckCircle2, Clock, MapPin, User, Stethoscope, Printer, Download, Search, LayoutDashboard, Pill, ChevronRight, TrendingUp, Plus, Trash2, Image as ImageIcon, BarChart3, IndianRupee } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Package, CheckCircle2, Clock, MapPin, User, Stethoscope, Printer, Download, Search, LayoutDashboard, Pill, ChevronRight, TrendingUp, Plus, Trash2, Image as ImageIcon, BarChart3, IndianRupee, LogOut, ShieldAlert, KeyRound, UserPlus, Users, Shield, Tag, XCircle, Copy } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const [orders, setOrders] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,6 +19,36 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("ORDERS");
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [formData, setFormData] = useState<any>({});
+
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [abandonedPage, setAbandonedPage] = useState(1);
+  const [productsPage, setProductsPage] = useState(1);
+  const ITEMS_PER_PAGE = 6;
+  const [adminUser, setAdminUser] = useState("Admin");
+
+  const [adminList, setAdminList] = useState<any[]>([]);
+  const [newAdmin, setNewAdmin] = useState({ email: '', username: '', password: '' });
+  const [adminFormState, setAdminFormState] = useState({ loading: false, error: '', success: '' });
+
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const [newCoupon, setNewCoupon] = useState({ name: '', discountPercentage: 10, maxUses: 1 });
+  const [couponFormState, setCouponFormState] = useState({ loading: false, error: '', success: '' });
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [couponSearch, setCouponSearch] = useState('');
+  const [couponPage, setCouponPage] = useState(1);
+  const COUPONS_PER_PAGE = 5;
+
+  const [confirmDeleteModal, setConfirmDeleteModal] = useState<{id: string, type: 'COUPON' | 'ADMIN', title: string, message: string} | null>(null);
+
+  useEffect(() => {
+    const match = document.cookie.match(/(?:^|; )admin_username=([^;]*)/);
+    if (match && match[1]) setAdminUser(match[1]);
+  }, []);
+
+  useEffect(() => {
+    setOrdersPage(1);
+    setAbandonedPage(1);
+  }, [filterType, customDate, customMonth, search]);
 
   const fetchOrders = async () => {
     try {
@@ -41,21 +74,73 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchAdmins = async () => {
+    try {
+      const res = await fetch("/api/admin/users");
+      if (res.ok) {
+        const data = await res.json();
+        setAdminList(data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchCoupons = async () => {
+    try {
+      const res = await fetch("/api/admin/coupons");
+      if (res.ok) {
+        const data = await res.json();
+        setCoupons(data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
-    Promise.all([fetchOrders(), fetchProducts()]).finally(() => setLoading(false));
+    Promise.all([fetchOrders(), fetchProducts(), fetchAdmins(), fetchCoupons()]).finally(() => setLoading(false));
   }, []);
 
-  const updateStatus = async (orderId: string, status: string) => {
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+      router.push("/admin/login");
+      router.refresh();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const [confirmStatusModal, setConfirmStatusModal] = useState<{orderId: string, newStatus: string, customerName: string} | null>(null);
+  const [statusUpdating, setStatusUpdating] = useState(false);
+
+  const requestStatusUpdate = (orderId: string, status: string, customerName: string) => {
+    setConfirmStatusModal({ orderId, newStatus: status, customerName });
+  };
+
+  const confirmUpdateStatus = async () => {
+    if (!confirmStatusModal) return;
+    setStatusUpdating(true);
     try {
       const res = await fetch("/api/admin/orders", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId, fulfillmentStatus: status })
+        body: JSON.stringify({ orderId: confirmStatusModal.orderId, fulfillmentStatus: confirmStatusModal.newStatus })
       });
-      if (res.ok) fetchOrders();
+      if (res.ok) {
+        await fetchOrders();
+        setConfirmStatusModal(null);
+      }
     } catch (error) {
       console.error(error);
+    } finally {
+      setStatusUpdating(false);
     }
+  };
+
+  const updateStatus = async (orderId: string, status: string) => {
+    requestStatusUpdate(orderId, status, "Unknown Customer");
   };
 
   const updateProductPrice = async (productId: string, price: number) => {
@@ -69,6 +154,104 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  // --- ADMIN MANAGEMENT LOGIC ---
+  const handleCreateAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminFormState({ loading: true, error: '', success: '' });
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newAdmin)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to create admin");
+      
+      setAdminFormState({ loading: false, error: '', success: 'Admin created successfully!' });
+      setNewAdmin({ email: '', username: '', password: '' });
+      fetchAdmins();
+      setTimeout(() => setAdminFormState(prev => ({ ...prev, success: '' })), 3000);
+    } catch (err: any) {
+      setAdminFormState({ loading: false, error: err.message, success: '' });
+    }
+  };
+
+  const requestDeleteAdmin = (id: string) => {
+    setConfirmDeleteModal({
+      id,
+      type: 'ADMIN',
+      title: 'Revoke Access',
+      message: 'Are you sure you want to completely revoke access for this administrator?'
+    });
+  };
+
+  const handleCreateCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCouponFormState({ loading: true, error: '', success: '' });
+    try {
+      const res = await fetch("/api/admin/coupons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newCoupon)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to create coupon");
+      
+      setCouponFormState({ loading: false, error: '', success: 'Coupon created successfully!' });
+      setNewCoupon({ name: '', discountPercentage: 10, maxUses: 1 });
+      fetchCoupons();
+      setTimeout(() => setCouponFormState(prev => ({ ...prev, success: '' })), 3000);
+    } catch (err: any) {
+      setCouponFormState({ loading: false, error: err.message, success: '' });
+    }
+  };
+
+  const handleToggleCoupon = async (id: string, isActive: boolean) => {
+    try {
+      const res = await fetch("/api/admin/coupons", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, isActive: !isActive })
+      });
+      if (res.ok) fetchCoupons();
+    } catch (err) {}
+  };
+
+  const requestDeleteCoupon = (id: string) => {
+    setConfirmDeleteModal({
+      id,
+      type: 'COUPON',
+      title: 'Delete Campaign',
+      message: 'Are you sure you want to permanently delete this discount campaign? This action cannot be undone.'
+    });
+  };
+
+  const executeDelete = async () => {
+    if (!confirmDeleteModal) return;
+    
+    if (confirmDeleteModal.type === 'COUPON') {
+      try {
+        const res = await fetch("/api/admin/coupons", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: confirmDeleteModal.id })
+        });
+        if (res.ok) fetchCoupons();
+      } catch (err) {}
+    } else if (confirmDeleteModal.type === 'ADMIN') {
+      try {
+        const res = await fetch("/api/admin/users", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: confirmDeleteModal.id })
+        });
+        if (res.ok) fetchAdmins();
+      } catch (err) {}
+    }
+    
+    setConfirmDeleteModal(null);
   };
 
   // --- NON-IT FORM BUILDER LOGIC ---
@@ -188,6 +371,10 @@ export default function AdminDashboard() {
   const successfulOrders = filteredOrders.filter(o => o.paymentStatus === "SUCCESS");
   const abandonedOrders = filteredOrders.filter(o => o.paymentStatus !== "SUCCESS");
 
+  const paginatedOrders = successfulOrders.slice((ordersPage - 1) * ITEMS_PER_PAGE, ordersPage * ITEMS_PER_PAGE);
+  const paginatedAbandoned = abandonedOrders.slice((abandonedPage - 1) * ITEMS_PER_PAGE, abandonedPage * ITEMS_PER_PAGE);
+  const paginatedProducts = products.slice((productsPage - 1) * ITEMS_PER_PAGE, productsPage * ITEMS_PER_PAGE);
+
   const totalRevenue = successfulOrders.reduce((sum, order) => sum + order.totalAmount, 0);
   const pendingFulfillments = successfulOrders.filter(o => o.fulfillmentStatus === "PROCESSING").length;
   
@@ -239,6 +426,29 @@ export default function AdminDashboard() {
     </div>
   );
 
+  const PaginationUI = ({ currentPage, totalItems, onPageChange }: { currentPage: number, totalItems: number, onPageChange: (page: number) => void }) => {
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    if (totalPages <= 1) return null;
+    return (
+      <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t border-slate-200 bg-white gap-4">
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+          Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, totalItems)} of {totalItems}
+        </p>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 max-w-full">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+            <button
+              key={page}
+              onClick={() => onPageChange(page)}
+              className={`w-8 h-8 shrink-0 flex items-center justify-center rounded-lg text-sm font-bold transition-all ${currentPage === page ? 'bg-brand-blue text-white shadow-md' : 'bg-white text-slate-500 hover:bg-slate-100 border border-slate-200'}`}
+            >
+              {page}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center bg-slate-50">
@@ -248,9 +458,9 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen flex bg-slate-50 overflow-hidden max-w-[100vw]">
+    <div className="fixed inset-0 top-20 md:top-24 z-40 flex bg-slate-50 overflow-hidden">
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-slate-200 hidden lg:flex flex-col py-8 px-4 h-[calc(100vh-80px)] sticky top-0 shrink-0">
+      <div className="w-64 bg-white border-r border-slate-200 hidden lg:flex flex-col py-8 px-4 h-full shrink-0">
         <h2 className="font-serif text-2xl font-bold text-slate-900 mb-8 px-2">Workspace</h2>
         <nav className="flex flex-col gap-2">
           <button onClick={() => setActiveTab('ANALYTICS')} className={`flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'ANALYTICS' ? 'bg-brand-blue text-white shadow-lg shadow-brand-blue/20' : 'text-slate-500 hover:bg-slate-100'}`}>
@@ -269,18 +479,55 @@ export default function AdminDashboard() {
             <span className="flex items-center gap-3"><Trash2 className="w-4 h-4" /> Failed Orders</span>
             {activeTab !== 'ABANDONED_CARTS' && <ChevronRight className="w-4 h-4 opacity-50" />}
           </button>
+          <div className="my-2 border-t border-slate-100"></div>
+          <button onClick={() => setActiveTab('ADMINS')} className={`flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'ADMINS' ? 'bg-brand-blue text-white shadow-lg shadow-brand-blue/20' : 'text-slate-500 hover:bg-slate-100'}`}>
+            <span className="flex items-center gap-3"><Shield className="w-4 h-4" /> Admin Access</span>
+            {activeTab !== 'ADMINS' && <ChevronRight className="w-4 h-4 opacity-50" />}
+          </button>
+          <button onClick={() => setActiveTab('COUPONS')} className={`flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'COUPONS' ? 'bg-brand-blue text-white shadow-lg shadow-brand-blue/20' : 'text-slate-500 hover:bg-slate-100'}`}>
+            <span className="flex items-center gap-3"><Tag className="w-4 h-4" /> Discount Codes</span>
+            {activeTab !== 'COUPONS' && <ChevronRight className="w-4 h-4 opacity-50" />}
+          </button>
         </nav>
+        
+        <div className="mt-auto pt-8 border-t border-slate-100 flex items-center gap-3 px-2">
+          <div className="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center shrink-0 border border-brand-blue/20">
+            <span className="font-serif font-bold text-brand-blue text-lg leading-none">{adminUser.charAt(0).toUpperCase()}</span>
+          </div>
+          <div className="flex flex-col overflow-hidden">
+            <span className="font-bold text-xs uppercase tracking-wider text-slate-900 truncate" title={adminUser}>
+              {adminUser}
+            </span>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
+              Administrator
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 py-8 px-4 sm:px-8 w-full max-w-full overflow-x-hidden">
+      <div className="flex-1 py-8 px-4 sm:px-8 w-full max-w-full overflow-y-auto overflow-x-hidden h-full pb-32">
         
         {/* MOBILE TABS */}
-        <div className="flex lg:hidden gap-2 mb-6 overflow-x-auto pb-2">
-          <button onClick={() => setActiveTab('ANALYTICS')} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap ${activeTab === 'ANALYTICS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Analytics</button>
-          <button onClick={() => setActiveTab('ORDERS')} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap ${activeTab === 'ORDERS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Orders</button>
-          <button onClick={() => setActiveTab('PRODUCTS')} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap ${activeTab === 'PRODUCTS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Inventory</button>
-          <button onClick={() => setActiveTab('ABANDONED_CARTS')} className={`px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap ${activeTab === 'ABANDONED_CARTS' ? 'bg-brand-blue text-white' : 'bg-white text-slate-500 border border-slate-200'}`}>Failed Orders</button>
+        <div className="block lg:hidden mb-6 w-full">
+          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Dashboard Section</label>
+          <div className="relative">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value)}
+              className="w-full appearance-none bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue transition-all shadow-sm"
+            >
+              <option value="ANALYTICS">Analytics & Revenue</option>
+              <option value="ORDERS">Orders Data</option>
+              <option value="PRODUCTS">Inventory Config</option>
+              <option value="ABANDONED_CARTS">Failed Orders</option>
+              <option value="ADMINS">Admin Access</option>
+              <option value="COUPONS">Discount Codes</option>
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+              <ChevronRight className="w-4 h-4 rotate-90" />
+            </div>
+          </div>
         </div>
 
         {activeTab === 'ANALYTICS' && (
@@ -374,7 +621,7 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {successfulOrders.map((order) => (
+                    {paginatedOrders.map((order) => (
                       <tr key={order.id} className="hover:bg-slate-50/50 transition-colors">
                         <td className="p-5 align-top">
                           <div className="flex flex-col gap-1">
@@ -458,7 +705,11 @@ export default function AdminDashboard() {
                           <div className="flex flex-col gap-3">
                             <select 
                               value={order.fulfillmentStatus}
-                              onChange={(e) => updateStatus(order.id, e.target.value)}
+                              onChange={(e) => {
+                                if (e.target.value !== order.fulfillmentStatus) {
+                                  requestStatusUpdate(order.id, e.target.value, order.customerName);
+                                }
+                              }}
                               className={`text-sm font-bold px-3 py-2 rounded-xl outline-none border-2 transition-colors cursor-pointer w-full max-w-[160px]
                                 ${order.fulfillmentStatus === 'PROCESSING' ? 'border-amber-200 bg-amber-50 text-amber-700' : ''}
                                 ${order.fulfillmentStatus === 'SHIPPED' ? 'border-blue-200 bg-blue-50 text-blue-700' : ''}
@@ -491,6 +742,7 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+              <PaginationUI currentPage={ordersPage} totalItems={successfulOrders.length} onPageChange={setOrdersPage} />
             </div>
           </div>
         )}
@@ -520,7 +772,7 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {abandonedOrders.map((order) => (
+                    {paginatedAbandoned.map((order) => (
                       <tr key={order.id} className="hover:bg-slate-50/50 transition-colors">
                         <td className="p-5 align-top">
                           <div className="flex flex-col gap-1">
@@ -582,6 +834,7 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+              <PaginationUI currentPage={abandonedPage} totalItems={abandonedOrders.length} onPageChange={setAbandonedPage} />
             </div>
           </div>
         )}
@@ -782,7 +1035,7 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {products.map(product => (
+                      {paginatedProducts.map(product => (
                         <tr key={product.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-5">
                             <p className="font-bold text-slate-800">{product.name}</p>
@@ -805,12 +1058,495 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 </div>
+                <PaginationUI currentPage={productsPage} totalItems={products.length} onPageChange={setProductsPage} />
               </>
             )}
           </div>
         )}
 
+        {activeTab === 'ADMINS' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-[1200px] mx-auto mt-2">
+            
+            {/* Premium Header */}
+            <div className="relative overflow-hidden bg-brand-blue rounded-3xl p-8 sm:p-12 mb-10 shadow-[0_20px_50px_rgba(12,31,94,0.15)] flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="absolute inset-0 bg-[linear-gradient(150deg,#0c2160_0%,#1B3F8B_50%,#2460aa_100%)] z-0" />
+              <div className="absolute inset-0 opacity-[0.05] z-0 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+              
+              <div className="relative z-10 flex items-center gap-6 text-center md:text-left">
+                <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 shadow-inner">
+                  <Shield className="w-8 h-8 text-[#C9A048]" />
+                </div>
+                <div>
+                  <h1 className="font-serif text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">Security & Access</h1>
+                  <p className="text-white/70 font-medium text-sm max-w-md leading-relaxed">
+                    Manage administrative privileges and safeguard the integrity of the Dhinakar Pharma portal.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+              
+              {/* Form Section */}
+              <div className="xl:col-span-4">
+                <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-slate-100 p-8 sm:p-10 relative overflow-hidden group">
+                  <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#C9A048] to-brand-blue" />
+                  
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100">
+                      <UserPlus className="w-5 h-5 text-brand-blue" />
+                    </div>
+                    <h3 className="font-serif text-xl font-bold text-slate-900">Provision Admin</h3>
+                  </div>
+                  
+                  <form onSubmit={handleCreateAdmin} className="space-y-5">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Email Address</label>
+                      <input 
+                        type="email" 
+                        required
+                        value={newAdmin.email}
+                        onChange={(e) => setNewAdmin({...newAdmin, email: e.target.value})}
+                        className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-all"
+                        placeholder="admin@dhinakar.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Username</label>
+                      <input 
+                        type="text" 
+                        required
+                        pattern="^[a-zA-Z0-9_]+$"
+                        title="Username can only contain letters, numbers, and underscores."
+                        value={newAdmin.username}
+                        onChange={(e) => setNewAdmin({...newAdmin, username: e.target.value})}
+                        className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-all"
+                        placeholder="e.g. jdoe_admin"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Security Key</label>
+                      <input 
+                        type="password" 
+                        required
+                        minLength={6}
+                        value={newAdmin.password}
+                        onChange={(e) => setNewAdmin({...newAdmin, password: e.target.value})}
+                        className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-all"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                    
+                    {adminFormState.error && (
+                      <div className="p-4 bg-red-50/80 text-red-600 text-xs font-bold rounded-xl border border-red-100 flex items-center gap-3 animate-in fade-in zoom-in-95">
+                        <ShieldAlert className="w-5 h-5 shrink-0" />
+                        {adminFormState.error}
+                      </div>
+                    )}
+                    {adminFormState.success && (
+                      <div className="p-4 bg-[#C9A048]/10 text-[#C9A048] text-xs font-bold rounded-xl border border-[#C9A048]/20 flex items-center gap-3 animate-in fade-in zoom-in-95">
+                        <CheckCircle2 className="w-5 h-5 shrink-0" />
+                        {adminFormState.success}
+                      </div>
+                    )}
+
+                    <button 
+                      type="submit" 
+                      disabled={adminFormState.loading}
+                      className="w-full bg-slate-900 text-white rounded-2xl py-4 text-sm font-bold shadow-lg shadow-slate-900/20 hover:bg-brand-blue hover:shadow-brand-blue/30 transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-3 mt-6 group"
+                    >
+                      {adminFormState.loading ? (
+                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <KeyRound className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                      )}
+                      Authorize Access
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              {/* List Section */}
+              <div className="xl:col-span-8">
+                <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden flex flex-col h-full min-h-[400px]">
+                  <div className="p-6 sm:p-8 border-b border-slate-50 flex items-center justify-between bg-white sticky top-0 z-10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-brand-blue/5 flex items-center justify-center">
+                        <Users className="w-5 h-5 text-brand-blue" />
+                      </div>
+                      <h3 className="font-serif text-xl font-bold text-slate-900">Active Personnel</h3>
+                    </div>
+                    <div className="px-4 py-1.5 bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-widest rounded-full border border-slate-100">
+                      {adminList.length} Authorized
+                    </div>
+                  </div>
+                  
+                  <div className="divide-y divide-slate-50/80 p-2">
+                    {adminList.map((admin, index) => (
+                      <div key={admin.id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 rounded-2xl transition-colors group">
+                        <div className="flex items-center gap-4 sm:gap-5 min-w-0">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 border border-slate-200 flex items-center justify-center shrink-0 shadow-sm relative overflow-hidden">
+                            <span className="font-serif font-bold text-brand-blue text-xl leading-none relative z-10">
+                              {admin.username.charAt(0).toUpperCase()}
+                            </span>
+                            <div className="absolute inset-0 bg-brand-blue/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold text-slate-900 text-base flex items-center gap-2 truncate">
+                              {admin.username}
+                              {index === 0 && <span className="px-2 py-0.5 bg-[#C9A048]/10 text-[#C9A048] text-[9px] uppercase tracking-widest rounded border border-[#C9A048]/20 shrink-0">Root</span>}
+                            </p>
+                            <div className="text-[11px] font-bold text-slate-500 mt-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                              <span className="truncate">{admin.email}</span>
+                              <span className="text-slate-300 hidden sm:inline">•</span>
+                              <span className="flex items-center gap-1.5 uppercase tracking-wider text-slate-400">
+                                <Clock className="w-3 h-3 shrink-0" />
+                                <span className="whitespace-nowrap">Granted: {new Date(admin.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <button 
+                          onClick={() => requestDeleteAdmin(admin.id)}
+                          className="w-12 h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 hover:border-red-100 shadow-sm hover:shadow transition-all shrink-0"
+                          title="Revoke Access"
+                        >
+                          <Trash2 className="w-5 h-5 transition-transform" />
+                        </button>
+                      </div>
+                    ))}
+                    
+                    {adminList.length === 0 && (
+                      <div className="py-20 px-6 text-center">
+                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-5 border border-slate-100">
+                          <ShieldAlert className="w-8 h-8 text-slate-300" />
+                        </div>
+                        <p className="font-serif text-xl font-bold text-slate-900 mb-2">No active personnel</p>
+                        <p className="text-sm font-medium text-slate-500 max-w-xs mx-auto">System integrity is uncompromised, but you need to authorize users first.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'COUPONS' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-[1200px] mx-auto mt-4">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+              
+              {/* CREATE COUPON FORM */}
+              <div className="xl:col-span-1">
+                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden sticky top-8">
+                  <div className="p-8 border-b border-slate-100">
+                    <div className="w-12 h-12 bg-brand-blue/5 rounded-2xl flex items-center justify-center mb-6 border border-brand-blue/10">
+                      <Plus className="w-6 h-6 text-brand-blue" />
+                    </div>
+                    <h2 className="font-serif text-2xl font-bold text-slate-900 mb-2">New Policy</h2>
+                    <p className="text-sm font-medium text-slate-500 leading-relaxed">
+                      Generate a dynamic discount code for VIPs or seasonal campaigns.
+                    </p>
+                  </div>
+                  
+                  <div className="p-8 bg-slate-50/50">
+                    {couponFormState.error && (
+                      <div className="bg-red-50 text-red-600 text-xs font-bold p-4 rounded-xl mb-6 border border-red-100 flex items-center gap-2">
+                        <XCircle className="w-4 h-4" /> {couponFormState.error}
+                      </div>
+                    )}
+                    {couponFormState.success && (
+                      <div className="bg-green-50 text-green-600 text-xs font-bold p-4 rounded-xl mb-6 border border-green-100 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4" /> {couponFormState.success}
+                      </div>
+                    )}
+                  
+                    <form onSubmit={handleCreateCoupon} className="space-y-5">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Recipient / Campaign</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={newCoupon.name}
+                          onChange={(e) => setNewCoupon({...newCoupon, name: e.target.value})}
+                          className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-all shadow-sm"
+                          placeholder="e.g. Winter Sale"
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Discount %</label>
+                          <input 
+                            type="number" 
+                            required
+                            min="1"
+                            max="100"
+                            value={newCoupon.discountPercentage}
+                            onChange={(e) => setNewCoupon({...newCoupon, discountPercentage: Number(e.target.value)})}
+                            className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-all shadow-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Max Uses</label>
+                          <input 
+                            type="number" 
+                            required
+                            min="1"
+                            value={newCoupon.maxUses}
+                            onChange={(e) => setNewCoupon({...newCoupon, maxUses: Number(e.target.value)})}
+                            className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-all shadow-sm"
+                          />
+                        </div>
+                      </div>
+                      
+                      <button 
+                        disabled={couponFormState.loading}
+                        className="w-full py-4 mt-2 bg-brand-blue text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest hover:bg-[#0c1b42] transition-colors shadow-lg shadow-brand-blue/20 disabled:opacity-50"
+                      >
+                        {couponFormState.loading ? "Generating..." : "Generate Code"}
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+              {/* LIST COUPONS */}
+              <div className="xl:col-span-2">
+                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 h-full flex flex-col">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-100">
+                    <div>
+                      <h2 className="font-serif text-xl font-bold text-slate-900 flex items-center gap-3">
+                        <Tag className="w-5 h-5 text-[#C9A048]" />
+                        Campaign Policies
+                      </h2>
+                      <p className="text-xs font-medium text-slate-500 mt-1">Manage active & expired discounts</p>
+                    </div>
+                    <div className="relative w-full sm:max-w-[220px]">
+                      <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Search codes..."
+                        value={couponSearch}
+                        onChange={(e) => { setCouponSearch(e.target.value); setCouponPage(1); }}
+                        className="w-full bg-slate-50/50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue transition-all"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 flex flex-col gap-3">
+                    {(() => {
+                      const filteredCoupons = coupons.filter(c => c.name.toLowerCase().includes(couponSearch.toLowerCase()) || c.code.toLowerCase().includes(couponSearch.toLowerCase()));
+                      const totalPages = Math.ceil(filteredCoupons.length / COUPONS_PER_PAGE);
+                      const paginatedCoupons = filteredCoupons.slice((couponPage - 1) * COUPONS_PER_PAGE, couponPage * COUPONS_PER_PAGE);
+
+                      if (filteredCoupons.length === 0) return (
+                        <div className="py-20 px-6 text-center border-2 border-dashed border-slate-200 rounded-2xl mt-2 bg-slate-50/50">
+                          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100 shadow-sm">
+                            <Tag className="w-6 h-6 text-slate-300" />
+                          </div>
+                          <p className="font-serif text-lg font-bold text-slate-900 mb-1">No campaigns found</p>
+                          <p className="text-xs font-medium text-slate-500">Try adjusting your search or generate a new code.</p>
+                        </div>
+                      );
+
+                      return (
+                        <>
+                          {paginatedCoupons.map((coupon) => {
+                            const isExpired = coupon.uses >= coupon.maxUses;
+                            return (
+                              <div key={coupon.id} className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border transition-all ${isExpired ? 'bg-slate-50/50 border-slate-200 grayscale opacity-80' : 'bg-white border-slate-200 hover:border-brand-blue/30 hover:shadow-md hover:shadow-brand-blue/5'}`}>
+                                <div className="flex items-center gap-4 mb-4 sm:mb-0">
+                                  <div className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center shrink-0 border ${isExpired ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-brand-blue/5 text-brand-blue border-brand-blue/10'}`}>
+                                    <span className="font-serif text-lg font-bold leading-none">{coupon.discountPercentage}%</span>
+                                    <span className="text-[9px] font-bold uppercase tracking-widest mt-1">OFF</span>
+                                  </div>
+                                  <div>
+                                    <h3 className={`text-sm font-bold ${isExpired ? 'text-slate-500' : 'text-slate-900'}`}>{coupon.name}</h3>
+                                    <div className="flex items-center gap-2 mt-1.5">
+                                      <span className={`font-mono text-xs font-bold tracking-widest px-2 py-0.5 rounded-md ${isExpired ? 'bg-slate-200 text-slate-500 line-through' : 'bg-slate-100 text-brand-blue'}`}>
+                                        {coupon.code}
+                                      </span>
+                                      {isExpired ? (
+                                        <span className="px-2 py-0.5 bg-slate-200 text-slate-600 text-[9px] uppercase tracking-widest rounded font-bold shadow-inner">Expired</span>
+                                      ) : !coupon.isActive ? (
+                                        <span className="px-2 py-0.5 bg-orange-50 text-orange-600 text-[9px] uppercase tracking-widest rounded font-bold border border-orange-100">Disabled</span>
+                                      ) : null}
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex items-center justify-between sm:justify-end gap-5">
+                                  <div className="text-left sm:text-right">
+                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Uses</p>
+                                    <p className={`text-xs font-bold ${isExpired ? 'text-slate-500' : 'text-slate-700'}`}>{coupon.uses} / {coupon.maxUses}</p>
+                                  </div>
+                                  
+                                  <div className="h-8 w-px bg-slate-100 hidden sm:block"></div>
+                                  
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <button 
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(coupon.code);
+                                        setCopiedCode(coupon.code);
+                                        setTimeout(() => setCopiedCode(null), 2000);
+                                      }}
+                                      className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 border border-slate-200 text-slate-400 hover:text-brand-blue hover:bg-white transition-all shadow-sm"
+                                      title="Copy Code"
+                                    >
+                                      {copiedCode === coupon.code ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                                    </button>
+                                    <button 
+                                      disabled={isExpired}
+                                      onClick={() => handleToggleCoupon(coupon.id, coupon.isActive)}
+                                      className={`px-3 h-8 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all shadow-sm ${isExpired ? 'opacity-30 cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200' : coupon.isActive ? 'bg-white border border-slate-200 text-slate-500 hover:text-orange-600 hover:border-orange-200' : 'bg-white border border-slate-200 text-slate-500 hover:text-green-600 hover:border-green-200'}`}
+                                    >
+                                      {coupon.isActive ? "Disable" : "Enable"}
+                                    </button>
+                                    <button 
+                                      onClick={() => requestDeleteCoupon(coupon.id)}
+                                      className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-red-500 hover:border-red-200 transition-all shadow-sm"
+                                      title="Delete"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          
+                          {totalPages > 1 && (
+                            <div className="flex items-center justify-between mt-auto pt-4">
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                Page {couponPage} of {totalPages}
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <button 
+                                  onClick={() => setCouponPage(p => Math.max(1, p - 1))} 
+                                  disabled={couponPage === 1}
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                                >
+                                  <ChevronRight className="w-4 h-4 rotate-180" />
+                                </button>
+                                <button 
+                                  onClick={() => setCouponPage(p => Math.min(totalPages, p + 1))} 
+                                  disabled={couponPage === totalPages}
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                                >
+                                  <ChevronRight className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
+      
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {confirmStatusModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+              onClick={() => !statusUpdating && setConfirmStatusModal(null)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden z-10"
+            >
+              <div className="p-6 sm:p-8">
+                <div className="w-12 h-12 bg-blue-50 text-brand-blue rounded-full flex items-center justify-center mb-5 border border-blue-100">
+                  <Package className="w-6 h-6" />
+                </div>
+                <h3 className="font-serif text-2xl font-bold text-slate-900 mb-2">Change Fulfillment Status</h3>
+                <p className="text-slate-500 text-sm font-medium leading-relaxed mb-6">
+                  You are about to change the status of <strong className="text-slate-800">{confirmStatusModal.customerName}'s</strong> order to <strong className="text-slate-800">{confirmStatusModal.newStatus}</strong>. An automated email notification will be sent to the customer immediately.
+                </p>
+                <div className="flex gap-3 mt-8">
+                  <button 
+                    onClick={() => setConfirmStatusModal(null)} 
+                    disabled={statusUpdating}
+                    className="flex-1 px-4 py-3 rounded-xl font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={confirmUpdateStatus} 
+                    disabled={statusUpdating}
+                    className="flex-1 px-4 py-3 rounded-xl font-bold text-sm bg-brand-blue text-white hover:bg-brand-blue/90 shadow-lg shadow-brand-blue/20 transition-all disabled:opacity-70 flex items-center justify-center gap-2"
+                  >
+                    {statusUpdating ? (
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4" />
+                    )}
+                    {statusUpdating ? 'Updating...' : 'Confirm & Send'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {confirmDeleteModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+              onClick={() => setConfirmDeleteModal(null)}
+            />
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="relative bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-slate-100"
+            >
+              <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mb-6 border border-red-100 mx-auto">
+                <Trash2 className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="font-serif text-2xl font-bold text-slate-900 mb-2 text-center">{confirmDeleteModal.title}</h3>
+              <p className="text-slate-500 text-sm mb-8 text-center">{confirmDeleteModal.message}</p>
+              
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => setConfirmDeleteModal(null)}
+                  className="flex-1 py-3.5 rounded-2xl border border-slate-200 text-slate-600 font-bold text-[11px] uppercase tracking-widest hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={executeDelete}
+                  className="flex-1 py-3.5 rounded-2xl bg-red-500 text-white font-bold text-[11px] uppercase tracking-widest hover:bg-red-600 transition-colors shadow-lg shadow-red-500/30"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

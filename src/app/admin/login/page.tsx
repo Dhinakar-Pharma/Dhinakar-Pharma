@@ -1,14 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Lock, ShieldCheck, Server, KeyRound, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { Lock, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function AdminLogin() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,7 +21,7 @@ export default function AdminLogin() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ email, password })
       });
 
       if (res.ok) {
@@ -41,162 +39,123 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-140px)] flex items-center justify-center bg-slate-100 p-4 sm:p-8 relative overflow-hidden">
+    <div className="fixed inset-0 z-[100] flex font-sans overflow-hidden bg-white">
       
-      {/* Advanced Animated Background */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_50%,transparent_20%,#f1f5f9_100%)] z-10"></div>
+      {/* LEFT SIDE: VIDEO IMMERSIVE */}
+      <div className="relative hidden lg:block lg:w-2/3 h-screen overflow-hidden bg-brand-blue">
+        <video 
+          autoPlay 
+          muted 
+          loop 
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
+        >
+          <source src="/admin-bg.mp4.mp4" type="video/mp4" />
+        </video>
         
-        {/* Infinite Scrolling Grid */}
+        {/* Elegant Dark Overlays */}
+        <div className="absolute inset-0 bg-brand-blue/60 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-blue/90 via-brand-blue/50 to-transparent" />
+        
+        {/* Top Left Logo */}
+        <div className="absolute top-8 left-8 md:top-10 md:left-12 z-20 w-40 md:w-56">
+           <img src="/logo.png" alt="Dhinakar Pharma" className="w-full h-auto object-contain brightness-0 invert drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]" />
+        </div>
+        
+        {/* Bottom Text Content */}
+        <div className="absolute inset-0 flex flex-col p-12 md:p-16 justify-end z-10 pb-20">
+            <h1 className="font-serif text-5xl xl:text-6xl font-bold text-white mb-6 leading-tight max-w-2xl">
+              Dhinakar Pharma <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C9A048] to-[#f5e48a]">Administrative Control.</span>
+            </h1>
+            <p className="text-white/80 text-lg max-w-lg font-medium leading-relaxed">
+              Secure gateway for enterprise resource planning, live inventory management, and clinical data oversight.
+            </p>
+          </div>
+        </div>
+
+      {/* RIGHT SIDE: FULL HEIGHT LOGIN PANEL */}
+      <div className="w-full lg:w-1/3 h-screen flex flex-col justify-center px-8 sm:px-12 xl:px-16 bg-white shadow-[-30px_0_60px_rgba(0,0,0,0.1)] relative z-20 overflow-y-auto">
+        
         <motion.div 
-          animate={{ x: [0, -40], y: [0, -40] }}
-          transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
-          className="absolute w-[150%] h-[150%] top-[-10%] left-[-10%] bg-[linear-gradient(to_right,#cbd5e1_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e1_1px,transparent_1px)] bg-[size:40px_40px] opacity-40"
-        />
-        
-        {/* Floating atmospheric glows with Framer Motion */}
-        {mounted && (
-          <>
-            <motion.div 
-              animate={{ x: [0, 50, -30, 0], y: [0, -50, 40, 0], scale: [1, 1.1, 0.9, 1] }} 
-              transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-[-20%] left-[-10%] w-[70vw] h-[70vw] rounded-full bg-blue-500/15 blur-[150px]" 
-            />
-            <motion.div 
-              animate={{ x: [0, -60, 40, 0], y: [0, 60, -30, 0], scale: [1, 0.9, 1.2, 1] }} 
-              transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-amber-500/10 blur-[150px]" 
-            />
-            
-            {/* Floating Data Particles */}
-            {Array.from({ length: 25 }).map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1 h-1 bg-brand-blue/50 rounded-full"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-                animate={{
-                  y: [0, -80, 0],
-                  opacity: [0, 1, 0],
-                }}
-                transition={{
-                  duration: Math.random() * 5 + 5,
-                  repeat: Infinity,
-                  ease: "linear",
-                  delay: Math.random() * 5,
-                }}
-              />
-            ))}
-          </>
-        )}
-      </div>
-
-      <div className="w-full max-w-4xl max-h-[90vh] bg-white/40 backdrop-blur-2xl rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row relative z-10 border border-white/60">
-        
-        {/* Left Side: Branding & Info */}
-        <div className="md:w-5/12 bg-slate-900/95 text-white p-8 md:p-10 flex flex-col justify-between relative overflow-hidden">
-          {/* Subtle pattern background */}
-          <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
-          
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-[10px] uppercase tracking-widest font-bold mb-8 text-white backdrop-blur-md">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
-              System Online
-            </div>
-            <h1 className="font-serif text-3xl lg:text-4xl font-bold mb-4 leading-tight">Dhinakar<br />Command<br />Center</h1>
-            <p className="text-slate-400 text-xs font-medium leading-relaxed max-w-sm mt-4">Secure, authenticated access to the central database and live analytics infrastructure.</p>
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="w-full max-w-sm mx-auto flex flex-col justify-center min-h-full py-12"
+        >
+          <div className="flex flex-col items-center mb-12 text-center">
+            <img src="/logo.png" alt="Dhinakar Pharma Logo" className="w-48 object-contain mb-8" />
+            <h2 className="font-serif text-3xl font-bold text-brand-blue mb-2">Welcome Back</h2>
+            <p className="text-slate-500 text-sm font-medium">Please enter your details to sign in.</p>
           </div>
 
-          <div className="relative z-10 space-y-4 mt-8 hidden md:block">
-            <div className="flex items-center gap-4">
-              <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-4 h-4 text-amber-400" />
-              </div>
-              <div>
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-300">End-to-End Encryption</h3>
-                <p className="text-[10px] text-slate-500 font-medium mt-0.5">256-bit secure connection</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                <Server className="w-4 h-4 text-amber-400" />
-              </div>
-              <div>
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-300">Live Database Sync</h3>
-                <p className="text-[10px] text-slate-500 font-medium mt-0.5">Real-time inventory changes</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side: Login Form */}
-        <div className="md:w-7/12 p-8 md:p-10 flex flex-col justify-center bg-white/50 relative">
-          <div className="w-full max-w-sm mx-auto">
-            <div className="w-12 h-12 bg-blue-50/80 text-blue-600 rounded-xl flex items-center justify-center mb-6 border border-blue-100/50 shadow-inner">
-              <KeyRound className="w-5 h-5" />
-            </div>
-            
-            <h2 className="font-serif text-2xl font-bold text-slate-900 mb-1">Admin Login</h2>
-            <p className="text-slate-500 font-medium text-xs mb-8">Enter your master credentials to proceed.</p>
-
+          <AnimatePresence mode="wait">
             {error && (
-              <div className="bg-red-50/80 text-red-600 text-[11px] font-bold p-3 rounded-lg mb-5 border border-red-100 flex items-center gap-2 animate-in slide-in-from-top-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"></div>
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Admin Username</label>
-                <input 
-                  type="text" 
-                  value={username} 
-                  onChange={e => setUsername(e.target.value)} 
-                  required 
-                  placeholder="admin"
-                  className="w-full px-4 py-3 rounded-xl border border-white/60 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-medium text-slate-900 bg-white/70 backdrop-blur-md focus:bg-white placeholder:text-slate-300 shadow-sm text-sm" 
-                />
-              </div>
-              
-              <div className="space-y-1">
-                <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Master Password</label>
-                <input 
-                  type="password" 
-                  value={password} 
-                  onChange={e => setPassword(e.target.value)} 
-                  required 
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 rounded-xl border border-white/60 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-bold text-slate-900 bg-white/70 backdrop-blur-md focus:bg-white placeholder:text-slate-300 shadow-sm text-sm" 
-                />
-              </div>
-
-              <button 
-                disabled={loading} 
-                className="w-full py-3.5 mt-2 bg-slate-900 text-white font-bold uppercase tracking-[0.1em] text-[10px] rounded-xl hover:bg-blue-600 transition-all shadow-lg hover:shadow-blue-600/30 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
               >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                    Authenticating...
-                  </span>
-                ) : (
-                  <>
-                    Initialize Session
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </button>
-            </form>
-            
-            <div className="mt-8 flex items-center justify-center gap-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-              <Lock className="w-2.5 h-2.5" />
-              Restricted Area • Authorized Personnel Only
+                <div className="bg-red-50 text-red-600 text-xs font-bold p-4 rounded-xl mb-6 border border-red-100 flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
+                  {error}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-600 mb-2 ml-1">Email Address</label>
+              <input 
+                type="email" 
+                value={email} 
+                onChange={e => setEmail(e.target.value)} 
+                required 
+                placeholder="admin@dhinakar.com"
+                className="w-full px-5 py-4 rounded-xl border border-slate-200 focus:border-brand-blue outline-none transition-all text-sm font-medium text-slate-900 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-brand-blue/5" 
+              />
             </div>
+            
+            <div>
+              <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-600 mb-2 ml-1">Password</label>
+              <input 
+                type="password" 
+                value={password} 
+                onChange={e => setPassword(e.target.value)} 
+                required 
+                placeholder="••••••••"
+                className="w-full px-5 py-4 rounded-xl border border-slate-200 focus:border-brand-blue outline-none transition-all text-sm font-bold text-slate-900 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-brand-blue/5 tracking-widest placeholder:tracking-normal" 
+              />
+            </div>
+
+            <button 
+              disabled={loading} 
+              className="w-full py-4 mt-6 bg-brand-blue text-white font-bold text-sm rounded-xl hover:bg-[#0c1b42] transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 group shadow-[0_10px_20px_rgba(12,31,94,0.15)]"
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  Authenticating...
+                </span>
+              ) : (
+                <>
+                  Sign In
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
+          </form>
+          
+          <div className="mt-16 flex flex-col items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            <div className="flex items-center gap-2">
+              <Lock className="w-3.5 h-3.5" />
+              256-bit Encrypted Connection
+            </div>
+            <span className="text-slate-300">© {new Date().getFullYear()} Dhinakar Pharma</span>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

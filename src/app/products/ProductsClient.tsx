@@ -22,7 +22,7 @@ export default function ProductsClient({ products }: { products: any[] }) {
     <div className="min-h-screen bg-white flex flex-col pt-0 font-sans scroll-mt-20 md:scroll-mt-24">
 
       {/* ── 1. HEADER (STREAMLINED NAV) ── */}
-      <div className="w-full relative py-14 sm:py-20 px-6 lg:px-12 border-b border-brand-blue/10" style={{ background: "linear-gradient(150deg, #0c2160 0%, #1B3F8B 50%, #2460aa 100%)" }}>
+      <div className="w-full relative z-30 py-14 sm:py-20 px-6 lg:px-12 border-b border-brand-blue/10" style={{ background: "linear-gradient(150deg, #0c2160 0%, #1B3F8B 50%, #2460aa 100%)" }}>
         <div className="absolute inset-0 opacity-[0.05] pointer-events-none"
           style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
 
@@ -194,16 +194,7 @@ function ProductSection({ product, index }: { product: any, index: number }) {
                 )}
               </div>
 
-              {/* Clinic Core Badge */}
-              <div className="absolute bottom-0 right-6 lg:right-16 bg-white px-8 py-5 rounded-3xl shadow-2xl border border-gray-50 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-brand-blue/5 flex items-center justify-center">
-                  <ShieldCheck className="w-5 h-5 text-brand-blue" />
-                </div>
-                <div>
-                  <p className="text-[9px] uppercase font-black text-brand-blue/40 tracking-[0.2em] mb-0.5">Clinic Core</p>
-                  <p className="text-sm font-bold text-gray-900 tracking-wide uppercase">{product.category}</p>
-                </div>
-              </div>
+
             </motion.div>
           </div>
 

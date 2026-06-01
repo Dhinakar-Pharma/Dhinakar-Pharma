@@ -41,6 +41,7 @@ model Order {
   paymentStatus     PaymentStatus @default(PENDING)
   fulfillmentStatus FulfillmentStatus @default(PROCESSING)
   razorpayOrderId   String?
+  promoCode         String?
   
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -86,4 +87,25 @@ enum FulfillmentStatus {
   PROCESSING
   SHIPPED
   DELIVERED
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique @default("admin@dhinakar.com")
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Coupon {
+  id                 String   @id @default(cuid())
+  name               String
+  code               String   @unique
+  discountPercentage Float
+  maxUses            Int      @default(1)
+  uses               Int      @default(0)
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
