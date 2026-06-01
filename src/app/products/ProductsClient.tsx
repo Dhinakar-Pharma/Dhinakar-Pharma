@@ -183,11 +183,10 @@ function ProductSection({ product, index }: { product: any, index: number }) {
                         key={idx}
                         onClick={() => setActiveIdx(idx)}
                         aria-label={`View image ${idx + 1}`}
-                        className={`rounded-full transition-all duration-300 ${
-                          activeIdx === idx
+                        className={`rounded-full transition-all duration-300 ${activeIdx === idx
                             ? 'w-7 h-2.5 bg-brand-blue shadow-[0_0_10px_rgba(27,63,139,0.5)]'
                             : 'w-2.5 h-2.5 bg-slate-300 hover:bg-brand-blue/40'
-                        }`}
+                          }`}
                       />
                     ))}
                   </div>
@@ -234,7 +233,7 @@ function ProductSection({ product, index }: { product: any, index: number }) {
                 href={`/products/${product.id}`}
                 className="group inline-flex items-center gap-6 px-12 py-6 bg-brand-blue text-white rounded-full font-bold uppercase tracking-[0.2em] text-[11px] shadow-2xl hover:bg-brand-blue-dark transition-all"
               >
-                <span>View More</span>
+                <span>Buy Now</span>
                 <ArrowRight className="w-5 h-5 text-gold-dark group-hover:translate-x-2 transition-transform" />
               </Link>
             </motion.div>

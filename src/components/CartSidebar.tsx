@@ -16,7 +16,7 @@ export default function CartSidebar() {
   const [checkoutResult, setCheckoutResult] = useState<CheckoutResult>({ status: "idle" });
   
   const [promoCode, setPromoCode] = useState("");
-  const [appliedPromo, setAppliedPromo] = useState<{code: string, discountAmount: number} | null>(null);
+  const [appliedPromo, setAppliedPromo] = useState<{code: string, discountAmount: number, doctorName?: string} | null>(null);
   const [promoError, setPromoError] = useState("");
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
 
@@ -252,7 +252,10 @@ export default function CartSidebar() {
                           });
                           const data = await res.json();
                           if (res.ok && data.success) {
-                            setAppliedPromo({ code: data.code, discountAmount: subtotal * (data.discountPercentage / 100) });
+                            setAppliedPromo({ code: data.code, discountAmount: subtotal * (data.discountPercentage / 100), doctorName: data.doctorName });
+                            if (data.doctorName) {
+                              setFormData(prev => ({ ...prev, doctor: data.doctorName }));
+                            }
                           } else {
                             setPromoError(data.error || "Invalid promo code.");
                           }
@@ -294,7 +297,14 @@ export default function CartSidebar() {
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Prescribing Doctor *</label>
-                <input type="text" placeholder="Dr. Smith" value={formData.doctor} onChange={(e) => setFormData({...formData, doctor: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-blue focus:ring-1 outline-none transition-all font-medium text-slate-900" />
+                <input 
+                  type="text" 
+                  placeholder="Dr. Smith" 
+                  value={formData.doctor} 
+                  disabled={!!appliedPromo?.doctorName}
+                  onChange={(e) => setFormData({...formData, doctor: e.target.value})} 
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-blue focus:ring-1 outline-none transition-all font-medium text-slate-900 disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed" 
+                />
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2">Full Shipping Address</label>

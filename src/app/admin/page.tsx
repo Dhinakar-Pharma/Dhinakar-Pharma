@@ -38,7 +38,11 @@ export default function AdminDashboard() {
   const [couponPage, setCouponPage] = useState(1);
   const COUPONS_PER_PAGE = 5;
 
-  const [confirmDeleteModal, setConfirmDeleteModal] = useState<{id: string, type: 'COUPON' | 'ADMIN', title: string, message: string} | null>(null);
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [newDoctor, setNewDoctor] = useState({ name: '', codePrefix: '' });
+  const [doctorFormState, setDoctorFormState] = useState({ loading: false, error: '', success: '' });
+
+  const [confirmDeleteModal, setConfirmDeleteModal] = useState<{id: string, type: 'COUPON' | 'ADMIN' | 'DOCTOR', title: string, message: string} | null>(null);
 
   useEffect(() => {
     const match = document.cookie.match(/(?:^|; )admin_username=([^;]*)/);
@@ -98,8 +102,18 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchDoctors = async () => {
+    try {
+      const res = await fetch("/api/admin/doctors");
+      if (res.ok) {
+        const data = await res.json();
+        setDoctors(data);
+      }
+    } catch (error) {}
+  };
+
   useEffect(() => {
-    Promise.all([fetchOrders(), fetchProducts(), fetchAdmins(), fetchCoupons()]).finally(() => setLoading(false));
+    Promise.all([fetchOrders(), fetchProducts(), fetchAdmins(), fetchCoupons(), fetchDoctors()]).finally(() => setLoading(false));
   }, []);
 
   const handleLogout = async () => {
@@ -249,9 +263,93 @@ export default function AdminDashboard() {
         });
         if (res.ok) fetchAdmins();
       } catch (err) {}
+    } else if (confirmDeleteModal.type === 'DOCTOR') {
+      try {
+        const res = await fetch("/api/admin/doctors", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: confirmDeleteModal.id })
+        });
+        if (res.ok) fetchDoctors();
+      } catch (err) {}
     }
     
     setConfirmDeleteModal(null);
+  };
+
+  const downloadCouponsCSV = () => {
+    if (!coupons.length) return;
+
+    // Headers
+    const headers = ["ID", "Campaign Name", "Promo Code", "Discount Percentage", "Max Uses", "Current Uses", "Status", "Prescribing Doctor"];
+    
+    // Rows
+    const rows = coupons.map(c => {
+      let docName = "None";
+      const parts = c.code.split('-');
+      if (parts.length > 1) {
+        const prefix = parts[0];
+        const doctor = doctors.find(d => d.codePrefix === prefix);
+        if (doctor) {
+          docName = (!doctor.name.toLowerCase().startsWith('dr.') && !doctor.name.toLowerCase().startsWith('dr ')) 
+            ? `Dr. ${doctor.name.trim()}` 
+            : doctor.name.trim();
+        }
+      }
+
+      return [
+        c.id,
+        `"${c.name}"`, 
+        c.code,
+        c.discountPercentage + "%",
+        c.maxUses,
+        c.uses,
+        (c.uses >= c.maxUses) ? "Expired" : (c.isActive ? "Active" : "Disabled"),
+        `"${docName}"`
+      ].join(",");
+    });
+
+    const csvContent = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Dhinakar_Discount_Codes_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleCreateDoctor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setDoctorFormState({ loading: true, error: "", success: "" });
+    try {
+      const res = await fetch("/api/admin/doctors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newDoctor)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setDoctorFormState({ loading: false, error: "", success: "Doctor added successfully!" });
+        setNewDoctor({ name: '', codePrefix: '' });
+        fetchDoctors();
+        setTimeout(() => setDoctorFormState(prev => ({ ...prev, success: "" })), 3000);
+      } else {
+        setDoctorFormState({ loading: false, error: data.error || "Failed to add doctor", success: "" });
+      }
+    } catch (err) {
+      setDoctorFormState({ loading: false, error: "Something went wrong", success: "" });
+    }
+  };
+
+  const requestDeleteDoctor = (id: string) => {
+    setConfirmDeleteModal({
+      id,
+      type: 'DOCTOR',
+      title: 'Remove Doctor',
+      message: 'Are you sure you want to permanently delete this doctor? Their prefix will no longer trigger auto-fills.'
+    });
   };
 
   // --- NON-IT FORM BUILDER LOGIC ---
@@ -488,6 +586,10 @@ export default function AdminDashboard() {
             <span className="flex items-center gap-3"><Tag className="w-4 h-4" /> Discount Codes</span>
             {activeTab !== 'COUPONS' && <ChevronRight className="w-4 h-4 opacity-50" />}
           </button>
+          <button onClick={() => setActiveTab('DOCTORS')} className={`flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'DOCTORS' ? 'bg-brand-blue text-white shadow-lg shadow-brand-blue/20' : 'text-slate-500 hover:bg-slate-100'}`}>
+            <span className="flex items-center gap-3"><Stethoscope className="w-4 h-4" /> Doctors Config</span>
+            {activeTab !== 'DOCTORS' && <ChevronRight className="w-4 h-4 opacity-50" />}
+          </button>
         </nav>
         
         <div className="mt-auto pt-8 border-t border-slate-100 flex items-center gap-3 px-2">
@@ -523,6 +625,7 @@ export default function AdminDashboard() {
               <option value="ABANDONED_CARTS">Failed Orders</option>
               <option value="ADMINS">Admin Access</option>
               <option value="COUPONS">Discount Codes</option>
+              <option value="DOCTORS">Doctors Config</option>
             </select>
             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
               <ChevronRight className="w-4 h-4 rotate-90" />
@@ -1324,10 +1427,19 @@ export default function AdminDashboard() {
                       </h2>
                       <p className="text-xs font-medium text-slate-500 mt-1">Manage active & expired discounts</p>
                     </div>
-                    <div className="relative w-full sm:max-w-[220px]">
-                      <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        type="text"
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                      <button 
+                        onClick={downloadCouponsCSV}
+                        className="px-3 py-2.5 bg-white text-slate-600 rounded-xl font-bold text-[10px] uppercase tracking-widest border border-slate-200 hover:bg-slate-50 hover:text-brand-blue transition-all flex items-center gap-2 shadow-sm whitespace-nowrap"
+                        title="Download CSV"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Export</span>
+                      </button>
+                      <div className="relative w-full sm:max-w-[220px] flex-1">
+                        <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="text"
                         placeholder="Search codes..."
                         value={couponSearch}
                         onChange={(e) => { setCouponSearch(e.target.value); setCouponPage(1); }}
@@ -1335,6 +1447,7 @@ export default function AdminDashboard() {
                       />
                     </div>
                   </div>
+                </div>
                   
                   <div className="flex-1 flex flex-col gap-3">
                     {(() => {
@@ -1444,6 +1557,140 @@ export default function AdminDashboard() {
                         </>
                       );
                     })()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'DOCTORS' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="font-serif text-3xl font-bold text-slate-900">Doctors Config</h1>
+                <p className="text-slate-500 mt-1 font-medium text-sm">Manage doctor profiles and their unique promo code prefixes.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+              {/* Form Section */}
+              <div className="xl:col-span-4">
+                <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-slate-100 p-6 sm:p-8 sticky top-8">
+                  <div className="w-12 h-12 rounded-2xl bg-brand-blue/5 text-brand-blue flex items-center justify-center mb-6">
+                    <UserPlus className="w-6 h-6" />
+                  </div>
+                  <h3 className="font-serif text-xl font-bold text-slate-900 mb-2">Register Doctor</h3>
+                  <p className="text-slate-500 text-sm mb-8">Link a doctor's name to a specific prefix (e.g. DPHS).</p>
+                  
+                  <form onSubmit={handleCreateDoctor} className="space-y-5">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Doctor Name</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={newDoctor.name}
+                        onChange={(e) => setNewDoctor({...newDoctor, name: e.target.value})}
+                        className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-all"
+                        placeholder="e.g. Dr. A. Sharma"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Code Prefix</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={newDoctor.codePrefix}
+                        onChange={(e) => setNewDoctor({...newDoctor, codePrefix: e.target.value.toUpperCase()})}
+                        className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue outline-none transition-all uppercase placeholder:normal-case"
+                        placeholder="e.g. DPHS"
+                      />
+                    </div>
+                    
+                    {doctorFormState.error && (
+                      <div className="p-4 bg-red-50/80 text-red-600 text-xs font-bold rounded-xl border border-red-100 flex items-center gap-3">
+                        <ShieldAlert className="w-5 h-5 shrink-0" />
+                        {doctorFormState.error}
+                      </div>
+                    )}
+                    {doctorFormState.success && (
+                      <div className="p-4 bg-[#C9A048]/10 text-[#C9A048] text-xs font-bold rounded-xl border border-[#C9A048]/20 flex items-center gap-3">
+                        <CheckCircle2 className="w-5 h-5 shrink-0" />
+                        {doctorFormState.success}
+                      </div>
+                    )}
+
+                    <button 
+                      type="submit" 
+                      disabled={doctorFormState.loading}
+                      className="w-full bg-slate-900 text-white rounded-2xl py-4 text-sm font-bold shadow-lg shadow-slate-900/20 hover:bg-brand-blue transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-3 mt-6"
+                    >
+                      {doctorFormState.loading ? (
+                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <Plus className="w-5 h-5" />
+                      )}
+                      Register Doctor
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              {/* List Section */}
+              <div className="xl:col-span-8">
+                <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden flex flex-col h-full min-h-[400px]">
+                  <div className="p-6 sm:p-8 border-b border-slate-50 flex items-center justify-between bg-white sticky top-0 z-10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-brand-blue/5 flex items-center justify-center">
+                        <Stethoscope className="w-5 h-5 text-brand-blue" />
+                      </div>
+                      <h3 className="font-serif text-xl font-bold text-slate-900">Active Doctors</h3>
+                    </div>
+                    <div className="px-4 py-1.5 bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-widest rounded-full border border-slate-100">
+                      {doctors.length} Registered
+                    </div>
+                  </div>
+                  
+                  <div className="divide-y divide-slate-50/80 p-2">
+                    {doctors.map((doctor) => (
+                      <div key={doctor.id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 rounded-2xl transition-colors group">
+                        <div className="flex items-center gap-4 sm:gap-5 min-w-0">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 border border-slate-200 flex items-center justify-center shrink-0 shadow-sm relative overflow-hidden">
+                            <span className="font-serif font-bold text-brand-blue text-xl leading-none relative z-10">
+                              {doctor.name.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold text-slate-900 text-base flex items-center gap-2 truncate">
+                              {doctor.name}
+                            </p>
+                            <div className="text-[11px] font-bold text-slate-500 mt-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                              <span className="truncate">Prefix: <strong className="text-brand-blue tracking-wider">{doctor.codePrefix}</strong></span>
+                              <span className="text-slate-300 hidden sm:inline">•</span>
+                              <span className="flex items-center gap-1.5 uppercase tracking-wider text-slate-400">
+                                <Clock className="w-3 h-3 shrink-0" />
+                                <span className="whitespace-nowrap">Added: {new Date(doctor.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <button 
+                          onClick={() => requestDeleteDoctor(doctor.id)}
+                          className="w-12 h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 hover:border-red-100 shadow-sm hover:shadow transition-all shrink-0"
+                          title="Remove Doctor"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    ))}
+                    
+                    {doctors.length === 0 && (
+                      <div className="p-12 text-center text-slate-400 font-medium flex flex-col items-center">
+                        <Stethoscope className="w-12 h-12 opacity-20 mb-4" />
+                        <p>No doctors registered yet.</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

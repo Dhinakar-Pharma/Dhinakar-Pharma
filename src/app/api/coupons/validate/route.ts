@@ -26,10 +26,28 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "This promo code has reached its usage limit" }, { status: 400 });
     }
 
+    // Look for associated doctor via prefix (e.g. DPHS from DPHS-GFI1)
+    let doctorName = null;
+    const parts = formattedCode.split('-');
+    if (parts.length > 1) {
+      const prefix = parts[0];
+      const doctor = await prisma.doctor.findUnique({
+        where: { codePrefix: prefix }
+      });
+      if (doctor) {
+        let name = doctor.name.trim();
+        if (!name.toLowerCase().startsWith("dr.") && !name.toLowerCase().startsWith("dr ")) {
+          name = "Dr. " + name;
+        }
+        doctorName = name;
+      }
+    }
+
     return NextResponse.json({
       success: true,
       code: coupon.code,
-      discountPercentage: coupon.discountPercentage
+      discountPercentage: coupon.discountPercentage,
+      doctorName
     });
 
   } catch (error) {
