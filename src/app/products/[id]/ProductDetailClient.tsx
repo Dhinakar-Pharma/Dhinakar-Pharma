@@ -9,7 +9,8 @@ import {
   ArrowLeft, 
   ShieldCheck, 
   FlaskConical,
-  ShoppingCart
+  ShoppingCart,
+  X
 } from "lucide-react";
 import Link from "next/link";
 import { useCartStore } from "@/store/cartStore";
@@ -17,6 +18,7 @@ import { useCartStore } from "@/store/cartStore";
 export default function ProductDetailClient({ product }: { product: any }) {
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const { addItem, setIsOpen } = useCartStore();
 
   useEffect(() => {
@@ -108,7 +110,8 @@ export default function ProductDetailClient({ product }: { product: any }) {
                         exit={{ opacity: 0, scale: 1.02 }}
                         transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
                         alt={`${product.name} - View ${currentImageIndex + 1}`}
-                        className="w-full h-full object-contain p-6 drop-shadow-md group-hover:scale-[1.03] transition-transform duration-500"
+                        onClick={() => setIsLightboxOpen(true)}
+                        className="w-full h-full object-contain p-6 drop-shadow-md group-hover:scale-[1.03] transition-transform duration-500 cursor-zoom-in"
                       />
                     </AnimatePresence>
 
@@ -258,6 +261,38 @@ export default function ProductDetailClient({ product }: { product: any }) {
             </div>
          </div>
       </section>
+
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {isLightboxOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 sm:p-10 cursor-zoom-out backdrop-blur-sm"
+            onClick={() => setIsLightboxOpen(false)}
+          >
+            <button 
+              onClick={() => setIsLightboxOpen(false)}
+              className="absolute top-6 right-6 sm:top-10 sm:right-10 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-colors z-[110]"
+              aria-label="Close fullscreen image"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <motion.img
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.3, type: "spring", bounce: 0.3 }}
+              src={product.images?.[currentImageIndex]}
+              alt={product.name}
+              className="w-full h-full object-contain max-w-[90vw] max-h-[90vh] cursor-default drop-shadow-2xl"
+              onClick={(e) => e.stopPropagation()} 
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
