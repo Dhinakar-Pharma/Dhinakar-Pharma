@@ -165,7 +165,14 @@ export default function CartSidebar() {
                       <Trash2 className="w-4 h-4" />
                     </button>
                     <div className="w-20 h-20 bg-slate-50 rounded-xl flex items-center justify-center p-2 shrink-0">
-                      <img src={item.image} alt={item.name} className="w-full h-full object-contain mix-blend-multiply" />
+                      <img
+                        src={item.image || "/demo-product.png"}
+                        alt={item.name}
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = "/logo.png";
+                        }}
+                        className="w-full h-full object-contain mix-blend-multiply"
+                      />
                     </div>
                     <div className="flex-grow pr-6">
                       <h3 className="font-bold text-slate-800 text-sm">{item.name}</h3>

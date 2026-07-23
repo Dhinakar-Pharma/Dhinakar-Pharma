@@ -84,6 +84,9 @@ export default function ProductDetailClient({ product }: { product: any }) {
                         <img
                           src={img}
                           alt={`${product.name} thumbnail ${idx + 1}`}
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = "/logo.png";
+                          }}
                           className="w-full h-full object-contain p-1.5 bg-white"
                         />
                         {currentImageIndex === idx && (
@@ -104,7 +107,10 @@ export default function ProductDetailClient({ product }: { product: any }) {
                     <AnimatePresence mode="wait">
                       <motion.img
                         key={currentImageIndex}
-                        src={product.images?.[currentImageIndex]}
+                        src={product.images?.[currentImageIndex] || "/demo-product.png"}
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = "/logo.png";
+                        }}
                         initial={{ opacity: 0, scale: 0.96 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 1.02 }}

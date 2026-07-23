@@ -165,8 +165,11 @@ function ProductSection({ product, index }: { product: any, index: number }) {
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={activeIdx}
-                    src={images[activeIdx] || undefined}
+                    src={images[activeIdx] || "/demo-product.png"}
                     alt={`${product.name} - view ${activeIdx + 1}`}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "/logo.png";
+                    }}
                     initial={{ opacity: 0, x: 40 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -40 }}
