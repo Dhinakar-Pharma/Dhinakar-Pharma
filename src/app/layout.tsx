@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 
 import Navbar from "@/components/Navbar";
@@ -11,11 +11,13 @@ export const dynamic = 'force-dynamic';
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -61,12 +63,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${playfair.variable} h-full antialiased`}
+      className={`${inter.variable} ${outfit.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="font-sans antialiased bg-white text-gray-900 overflow-x-hidden min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow pt-20 md:pt-24">{children}</main>
+        <main className="flex-grow pt-16 md:pt-20">{children}</main>
         <Footer />
       </body>
     </html>

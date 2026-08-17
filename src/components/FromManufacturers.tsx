@@ -1,34 +1,41 @@
-
 "use client";
-import { useEffect, useRef } from "react";
+
 import { motion } from "framer-motion";
-import { 
-  ShieldCheck, 
-  Award,
-  Beaker
-} from "lucide-react";
+import { ShieldCheck, Award, Microscope, CheckCircle2 } from "lucide-react";
+
+const certifications = [
+  { title: "WHO-GMP", category: "Global Standard", image: "/certifications/who-gmp.png", description: "Good Manufacturing Practices certification ensuring sterile production." },
+  { title: "USFDA Compliance", category: "Regulatory Approval", image: "/certifications/usfda.svg", description: "Strict adherence to United States Food and Drug Administration guidelines." },
+  { title: "ISO 9001:2015", category: "Quality System", image: "/certifications/iso.png", description: "International standard for Quality Management Systems (QMS)." },
+  { title: "HACCP Certified", category: "Safety Control", image: "/certifications/haccp.png", description: "Hazard Analysis Critical Control Point system for formulation safety." },
+  { title: "FSSAI Accreditation", category: "Food & Supplement", image: "/certifications/fssai.png", description: "Food Safety and Standards Authority of India manufacturing license." },
+  { title: "HALAL Certification", category: "Global Compliance", image: "/certifications/halal.png", description: "Certified for global dietary compliance and ethical standards." },
+  { title: "AYUSH Certified", category: "Formulation Standard", image: "/certifications/ayush.png", description: "Ministry of AYUSH manufacturing compliance for specialized generics." },
+  { title: "ISO 22000", category: "Safety Management", image: "/certifications/iso22000.png", description: "Comprehensive food and pharmaceutical safety management standard." }
+];
 
 export default function FromManufacturers() {
   return (
-    <div className="min-h-screen bg-white flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       
-      {/* ── 1. MINIMALIST INSTITUTIONAL BANNER ── */}
-      <div className="w-full relative overflow-hidden py-12 lg:py-16 px-6 lg:px-12" style={{ background: "linear-gradient(150deg, #0c2160 0%, #1B3F8B 50%, #2460aa 100%)" }}>
+      {/* ── 1. COMPACT INSTITUTIONAL BANNER ── */}
+      <div className="w-full relative overflow-hidden py-10 lg:py-14 px-6 sm:px-10 lg:px-16" style={{ background: "linear-gradient(150deg, #0c2160 0%, #1B3F8B 50%, #2460aa 100%)" }}>
         <div className="absolute inset-0 opacity-[0.05] pointer-events-none"
           style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
         
-        <div className="max-w-[1500px] mx-auto relative z-10">
-           <div className="flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-24">
+        <div className="max-w-[1800px] mx-auto relative z-10">
+           <div className="flex flex-col md:flex-row items-center justify-between gap-8 lg:gap-16">
               
-              {/* Left Side: Title */}
+              {/* Title */}
               <motion.div 
                 initial={{ opacity: 0, x: -20 }} 
                 animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
                 className="max-w-md text-center md:text-left"
               >
-                 <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
+                 <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
                     <div className="h-px w-6 bg-[#C9A048]" />
-                    <p className="text-[#C9A048] font-black tracking-[0.4em] uppercase text-[8px]">Institutional Authority</p>
+                    <p className="text-[#C9A048] font-bold tracking-[0.4em] uppercase text-[9px]">Institutional Authority</p>
                  </div>
                  <h1 className="text-3xl lg:text-4xl font-serif font-bold text-white leading-tight">
                     From the <br />
@@ -36,14 +43,14 @@ export default function FromManufacturers() {
                  </h1>
               </motion.div>
 
-              {/* Right Side: Statement Only */}
+              {/* Statement */}
               <motion.div 
                 initial={{ opacity: 0, x: 20 }} 
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-                className="max-w-xl text-center md:text-left border-l-0 md:border-l border-white/10 md:pl-12 lg:pl-16"
+                transition={{ delay: 0.1, duration: 0.5 }}
+                className="max-w-xl text-center md:text-left border-l-0 md:border-l border-white/10 md:pl-10 lg:pl-14"
               >
-                 <h2 className="text-lg lg:text-xl font-serif font-medium text-white/80 leading-[1.6] italic">
+                 <h2 className="text-base sm:text-lg lg:text-xl font-serif font-medium text-white/90 leading-[1.6] italic">
                     "Adhering to the most <span className="text-[#f5e48a] border-b border-[#C9A048]/30">stringent</span> manufacturing standards for safety and efficacy."
                  </h2>
               </motion.div>
@@ -52,149 +59,57 @@ export default function FromManufacturers() {
         </div>
       </div>
 
-      {/* ── 3. TECHNICAL INDEX (MINIMALIST CERTIFICATIONS) ── */}
-      <section className="pt-24 pb-8 bg-[#F8FAFC] border-t border-slate-100 relative overflow-hidden">
-         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-blue/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
-         
-         <div className="w-full px-6 lg:px-12 xl:px-24 mb-16 relative z-10">
-            <div className="flex flex-col items-start gap-8">
-               <div className="text-left flex-grow">
-                  <div className="flex items-center gap-3 mb-4">
-                     <div className="h-px w-6 bg-brand-blue/20" />
-                     <p className="text-brand-blue font-black tracking-[0.4em] uppercase text-[8px]">Scientific Archive</p>
-                  </div>
-                  <h2 className="text-3xl lg:text-4xl font-serif font-bold text-slate-900 leading-tight">
-                    Technical <span className="text-brand-blue italic font-medium">Index</span>
-                  </h2>
-                  <p className="text-slate-500 mt-6 max-w-xl text-sm lg:text-base font-light leading-relaxed">
-                    A comprehensive registry of international certifications and compliance standards governing our manufacturing protocols.
-                  </p>
-               </div>
-            </div>
-         </div>
+      {/* ── 2. CERTIFICATION & COMPLIANCE GRID ── */}
+      <section className="py-12 sm:py-16 max-w-[1800px] mx-auto px-6 sm:px-10 lg:px-16 w-full flex-grow">
+        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <span className="w-8 h-px bg-[#C9A048]" />
+            <span className="text-brand-blue font-bold tracking-[0.3em] uppercase text-[10px]">Technical Registry</span>
+            <span className="w-8 h-px bg-[#C9A048]" />
+          </div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-slate-900 leading-tight">
+            Accreditations & <span className="text-brand-blue italic font-medium">Compliance Standards</span>
+          </h2>
+          <p className="text-slate-500 text-xs sm:text-sm mt-3 font-normal">
+            A comprehensive index of international quality certifications governing our pharmaceutical manufacturing facilities.
+          </p>
+        </div>
 
-          {/* ── 3. FLOATING SCIENTIFIC RIBBON (PREMIUM EDITION) ── */}
-         <div className="relative py-4 overflow-hidden bg-[#F8FAFC]">
-            {/* Molecular Background Elements */}
-            <div className="absolute inset-0 pointer-events-none opacity-[0.4]">
-               {[
-                 { left: "12%", top: "24%" },
-                 { left: "68%", top: "15%" },
-                 { left: "35%", top: "72%" },
-                 { left: "85%", top: "58%" },
-                 { left: "45%", top: "33%" },
-                 { left: "18%", top: "85%" }
-               ].map((pos, i) => (
-                  <motion.div
-                     key={i}
-                     className="absolute w-64 h-64 rounded-full blur-[100px]"
-                     style={{ 
-                        backgroundColor: i % 2 === 0 ? '#1B3F8B08' : '#C9A04808',
-                        left: pos.left,
-                        top: pos.top
-                     }}
-                     animate={{ 
-                        x: [0, 50, 0],
-                        y: [0, 30, 0],
-                        scale: [1, 1.1, 1]
-                     }}
-                     transition={{ 
-                        duration: 10 + i * 2, 
-                        repeat: Infinity, 
-                        ease: "easeInOut" 
-                     }}
-                  />
-               ))}
-            </div>
+        {/* 8 Card Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {certifications.map((doc, i) => (
+            <motion.div
+              key={doc.title}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.05 }}
+              className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-lg transition-all duration-300 flex flex-col items-center text-center group"
+            >
+              {/* Logo Circle Container */}
+              <div className="w-28 h-28 rounded-full bg-slate-50 border border-slate-100 p-5 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform duration-300">
+                <img 
+                  src={doc.image} 
+                  alt={`${doc.title} Logo`} 
+                  className="w-full h-full object-contain mix-blend-multiply"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${doc.title}&background=0c2160&color=fff&font-size=0.33`;
+                  }}
+                />
+              </div>
 
-            {/* Edge Gradients for seamless infinite feel (Desktop only) */}
-            <div className="hidden lg:block absolute left-0 top-0 bottom-0 w-64 bg-gradient-to-r from-[#F8FAFC] via-[#F8FAFC]/80 to-transparent z-20 pointer-events-none" />
-            <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-64 bg-gradient-to-l from-[#F8FAFC] via-[#F8FAFC]/80 to-transparent z-20 pointer-events-none" />
-
-            <div className="flex flex-wrap lg:flex-nowrap justify-center lg:justify-start lg:w-fit desktop-marquee hover:[animation-play-state:paused] gap-x-8 gap-y-16 sm:gap-x-12 sm:gap-y-20 lg:gap-16 py-8 lg:py-12 px-2 sm:px-6 lg:px-16">
-               {[...Array(2)].map((_, idx) => (
-                  <div key={idx} className={`flex flex-wrap lg:flex-nowrap justify-center lg:justify-start gap-x-8 gap-y-16 sm:gap-x-12 sm:gap-y-20 lg:gap-16 ${idx === 1 ? 'hidden lg:flex' : ''}`}>
-                    {[
-                      { title: "WHO-GMP", color: "#1B3F8B", image: "/certifications/who-gmp.png", pad: "p-4 sm:p-6 lg:p-8", filter: "" },
-                      { title: "USFDA", color: "#0c2160", image: "/certifications/fda-eagle.png", pad: "p-1 lg:p-2", filter: "", objectFit: "object-contain", mixBlend: "mix-blend-normal", customText: "U.S. FDA Registration No.: 19866793808" },
-                      { title: "ISO 9001", color: "#C9A048", image: "/certifications/iso.png", pad: "p-3 sm:p-4 lg:p-6", filter: "" },
-                      { title: "HACCP", color: "#386641", image: "/certifications/haccp.png", pad: "p-2 sm:p-3 lg:p-4", filter: "" },
-                      { title: "FSSAI", color: "#006d77", image: "/certifications/fssai.png", pad: "p-2 sm:p-3 lg:p-4", filter: "contrast-125 brightness-105" },
-                      { title: "HALAL", color: "#457b9d", image: "/certifications/halal.png", pad: "p-3 sm:p-4 lg:p-6", filter: "" },
-                      { title: "Ayush", color: "#6a994e", image: "/certifications/ayush.png", pad: "p-1 sm:p-2 lg:p-2", filter: "contrast-125 brightness-105" },
-                      { title: "ISO 22000", color: "#4361ee", image: "/certifications/iso22000.png", pad: "p-3 sm:p-4 lg:p-6", filter: "" },
-                      { title: "Made in India", color: "#FF9933", image: "/certifications/india.png", pad: "p-2 sm:p-4 lg:p-6", filter: "", objectFit: "object-contain", mixBlend: "mix-blend-normal", customText: "Made in India" }
-                    ].map((doc, i) => (
-                      <motion.div 
-                        key={`${idx}-${i}`}
-                        initial={{ y: 0 }}
-                        animate={{ 
-                           y: [0, -20, 0],
-                        }}
-                        transition={{ 
-                           duration: 5 + (i % 4), 
-                           repeat: Infinity, 
-                           ease: "easeInOut" 
-                        }}
-                        className="relative flex flex-col items-center mb-8 sm:mb-10 lg:mb-0"
-                      >
-                         <motion.div 
-                           className={`w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 xl:w-56 xl:h-56 rounded-full bg-white/90 backdrop-blur-2xl border border-white/80 shadow-[0_20px_50px_rgba(0,0,0,0.03)] flex flex-col items-center justify-center group cursor-pointer transition-all duration-700 relative overflow-hidden ${doc.pad}`}
-                           whileHover={{ scale: 1.08, boxShadow: "0 30px 80px rgba(0,0,0,0.12)" }}
-                         >
-                            {/* Iridescent Gradient Border (Animated on Hover) */}
-                            <div 
-                               className="absolute inset-0 rounded-full p-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
-                               style={{ background: `linear-gradient(45deg, transparent, ${doc.color}40, transparent)` }}
-                            >
-                               <div className="w-full h-full rounded-full bg-white/0" />
-                            </div>
-
-                            {/* Shimmer Effect */}
-                            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none z-20" />
-
-                            {/* Accent Glow */}
-                            <div 
-                               className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-[0.08] transition-opacity duration-700 blur-3xl pointer-events-none" 
-                               style={{ backgroundColor: doc.color }}
-                            />
-
-                            <img 
-                               src={doc.image} 
-                               alt={`${doc.title} Logo`} 
-                               className={`w-full h-full ${doc.objectFit || 'object-contain'} ${doc.mixBlend || 'mix-blend-multiply'} relative z-10 transition-transform duration-700 group-hover:scale-110 ${doc.filter}`}
-                               onError={(e) => {
-                                 (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${doc.title}&background=${doc.color.replace('#', '')}&color=fff&font-size=0.33`;
-                               }}
-                            />
-                         </motion.div>
-
-                         {doc.customText && (
-                            <div className="absolute -bottom-6 sm:-bottom-8 z-30 w-[140%] sm:w-max max-w-[150%] sm:max-w-[140%] bg-white backdrop-blur-xl py-2 px-2 sm:px-5 rounded-xl sm:rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.12)] border border-slate-100 transition-transform duration-700 group-hover:-translate-y-2 flex items-center justify-center">
-                               <p className="text-[9px] sm:text-[9px] lg:text-[11px] font-extrabold text-[#0c2160] text-center uppercase tracking-wider leading-tight">
-                                  {doc.customText}
-                               </p>
-                            </div>
-                         )}
-                      </motion.div>
-                    ))}
-                  </div>
-               ))}
-            </div>
-         </div>
-
-         <style jsx global>{`
-            @keyframes marquee {
-               0% { transform: translateX(0); }
-               100% { transform: translateX(-50%); }
-            }
-            @media (min-width: 1024px) {
-               .desktop-marquee {
-                  animation: marquee 60s linear infinite;
-               }
-            }
-         `}</style>
+              <span className="text-[9px] font-bold uppercase tracking-widest text-[#C9A048] mb-1">{doc.category}</span>
+              <h3 className="text-base font-serif font-bold text-slate-900 mb-2 group-hover:text-brand-blue transition-colors">
+                {doc.title}
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed font-normal">
+                {doc.description}
+              </p>
+            </motion.div>
+          ))}
+        </div>
       </section>
+
     </div>
   );
 }
