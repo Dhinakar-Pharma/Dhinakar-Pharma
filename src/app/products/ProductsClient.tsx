@@ -85,14 +85,12 @@ export default function ProductsClient({ products }: { products: any[] }) {
         </div>
       </div>
 
-      {/* ── 2. STREAMLINED COMPACT PRODUCT GRID ── */}
-      <div className="w-full max-w-[1600px] mx-auto px-5 sm:px-10 lg:px-16 py-8 sm:py-14 flex-grow">
+      {/* ── 2. ELEGANT STREAMLINED ROW SHOWCASE ── */}
+      <div className="w-full max-w-[1600px] mx-auto px-5 sm:px-10 lg:px-16 py-10 sm:py-14 flex-grow space-y-8 sm:space-y-12">
         <AnimatePresence mode="popLayout">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {filteredProducts.map((p, index) => (
-              <ProductCard key={p.id} product={p} index={index} />
-            ))}
-          </div>
+          {filteredProducts.map((p, index) => (
+            <ProductRow key={p.id} product={p} index={index} />
+          ))}
         </AnimatePresence>
 
         {filteredProducts.length === 0 && (
@@ -107,66 +105,88 @@ export default function ProductsClient({ products }: { products: any[] }) {
   );
 }
 
-function ProductCard({ product, index }: { product: any, index: number }) {
+function ProductRow({ product, index }: { product: any, index: number }) {
+  const isEven = index % 2 === 0;
   const primaryImage = product.images?.[0] || "/logo.png";
+  const topIngredients = (product.ingredients as string[])?.slice(0, 3) || [];
 
   return (
-    <motion.div
+    <motion.section
       initial={{ opacity: 0, y: 15 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.4, delay: index * 0.05 }}
-      className="bg-white rounded-3xl border border-slate-200/90 shadow-[0_4px_25px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_35px_rgba(12,33,96,0.08)] hover:border-brand-blue/40 transition-all duration-300 flex flex-col justify-between overflow-hidden group"
+      transition={{ duration: 0.4 }}
+      className="bg-white rounded-3xl border border-slate-200/90 shadow-[0_4px_25px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_35px_rgba(12,33,96,0.06)] hover:border-brand-blue/30 transition-all duration-300 p-5 sm:p-8 lg:p-10 overflow-hidden relative"
     >
-      {/* Product Image Section */}
-      <Link href={`/products/${product.id}`} className="block relative w-full aspect-[4/3] bg-white p-4 overflow-hidden border-b border-slate-100 flex items-center justify-center">
-        <img
-          src={primaryImage}
-          alt={product.name}
-          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-        />
-        <span className="absolute top-4 right-4 bg-slate-100 text-brand-blue text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md border border-slate-200">
-          Rx Formulation
-        </span>
-      </Link>
+      <div className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-6 lg:gap-12`}>
 
-      {/* Product Information Section */}
-      <div className="p-6 flex flex-col flex-grow justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-[9px] font-extrabold tracking-[0.2em] uppercase text-[#C9A048]">{product.category}</span>
+        {/* Left/Right Column: Product Image */}
+        <div className="w-full lg:w-5/12">
+          <Link href={`/products/${product.id}`} className="block relative w-full aspect-[4/3] rounded-2xl bg-white border border-slate-200/80 overflow-hidden flex items-center justify-center p-3 shadow-sm group">
+            <img
+              src={primaryImage}
+              alt={product.name}
+              className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
+            />
+            <span className="absolute top-3 right-3 bg-slate-100/90 backdrop-blur-md text-brand-blue text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-md border border-slate-200">
+              Rx Formulation
+            </span>
+          </Link>
+        </div>
+
+        {/* Right/Left Column: Streamlined Concise Details */}
+        <div className="w-full lg:w-7/12 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[10px] font-extrabold tracking-[0.2em] uppercase text-[#C9A048]">{product.category}</span>
+              <span className="text-slate-300">•</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-brand-blue">{product.focus}</span>
+            </div>
+
+            <Link href={`/products/${product.id}`} className="block group">
+              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900 mb-1.5 group-hover:text-brand-blue transition-colors">
+                {product.name}
+              </h2>
+            </Link>
+
+            <p className="text-brand-blue text-xs sm:text-sm font-serif italic mb-3 font-semibold">
+              "{product.tagline}"
+            </p>
+
+            <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mb-4 line-clamp-2 font-normal">
+              {product.description}
+            </p>
+
+            {/* Concise Ingredients Preview */}
+            {topIngredients.length > 0 && (
+              <div className="mb-5 flex items-center gap-2 flex-wrap">
+                <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Key Active:</span>
+                {topIngredients.map((ing: string, i: number) => (
+                  <span key={i} className="bg-slate-100 text-slate-700 border border-slate-200/80 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold">
+                    {ing}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
-          <Link href={`/products/${product.id}`} className="block group-hover:text-brand-blue transition-colors">
-            <h2 className="text-xl sm:text-2xl font-serif font-bold text-slate-900 mb-1.5 tracking-tight">
-              {product.name}
-            </h2>
-          </Link>
+          {/* Action Bar */}
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Dhinakar Portfolio
+            </span>
 
-          <p className="text-brand-blue text-xs font-serif italic mb-3 font-semibold line-clamp-1">
-            "{product.tagline}"
-          </p>
-
-          <p className="text-slate-600 text-xs leading-relaxed line-clamp-2 mb-5 font-normal">
-            {product.description}
-          </p>
+            <Link
+              href={`/products/${product.id}`}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm hover:bg-[#0c2160] transition-colors"
+            >
+              <span>View More</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[#C9A048]" />
+            </Link>
+          </div>
         </div>
 
-        {/* Action Button */}
-        <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            Dhinakar Portfolio
-          </span>
-
-          <Link
-            href={`/products/${product.id}`}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-blue text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm hover:bg-[#0c2160] transition-colors"
-          >
-            <span>View More</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#C9A048]" />
-          </Link>
-        </div>
       </div>
-    </motion.div>
+    </motion.section>
   );
 }
